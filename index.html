@@ -1166,19 +1166,20 @@
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
                     
-                    // Updated to match the 5x5 layout shown in the reference image
                     const cols = 5;
                     const rows = 5;
                     const cellW = img.width / cols;
                     const cellH = img.height / rows;
 
-                    canvas.width = cellW;
-                    canvas.height = cellH;
+                    // Compress slice resolution to keep JSONBin payload sizes well within API limits
+                    const targetSize = 96;
+                    canvas.width = targetSize;
+                    canvas.height = targetSize;
 
                     const newSheet = {};
 
                     spritesData.forEach(sprite => {
-                        ctx.clearRect(0, 0, cellW, cellH);
+                        ctx.clearRect(0, 0, targetSize, targetSize);
                         
                         const padX = cellW * 0.035;
                         const padY = cellH * 0.035;
@@ -1187,8 +1188,9 @@
                         const srcW = cellW - (padX * 2);
                         const srcH = cellH - (padY * 2);
 
-                        ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, cellW, cellH);
-                        newSheet[sprite.id] = canvas.toDataURL('image/png');
+                        ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, targetSize, targetSize);
+                        // Use webp/jpeg compression dataURL to prevent oversized payloads
+                        newSheet[sprite.id] = canvas.toDataURL('image/webp', 0.85);
                     });
 
                     globalBaseSheet = newSheet;
@@ -1217,13 +1219,15 @@
                 });
 
                 if (res.ok) {
-                    alert("Admin Sprite Sheet successfully saved and updated!");
+                    alert("Admin Sprite Sheet successfully saved and updated to the cloud!");
                 } else {
-                    alert("Failed to upload to JSONBin cloud.");
+                    const errRes = await res.json().catch(() => ({}));
+                    console.error("Cloud Error Response:", errRes);
+                    alert(`Failed to upload to JSONBin cloud (Status ${res.status}). Check console for details.`);
                 }
             } catch (err) {
-                console.error("Upload error:", err);
-                alert("Error connecting to cloud server.");
+                console.error("Upload network error:", err);
+                alert("Network error connecting to cloud server. Check your connection or CORS settings.");
             }
         }
 
