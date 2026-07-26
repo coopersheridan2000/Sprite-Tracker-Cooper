@@ -121,6 +121,11 @@
             font-size: 0.9rem;
         }
 
+        .btn-upload {
+            background: #8b5cf6;
+            border-color: #7c3aed;
+        }
+
         .btn-reset {
             color: #ff6b81;
             border-color: #611e2d;
@@ -142,7 +147,8 @@
             display: flex;
             flex-direction: column;
             cursor: pointer;
-            transition: 0.1s;
+            transition: 0.15s ease-in-out;
+            position: relative;
         }
 
         .card:active {
@@ -151,6 +157,7 @@
 
         .card.completed {
             border-color: #10b981;
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.35);
         }
 
         .card-preview {
@@ -163,21 +170,61 @@
         }
 
         .sprite-img {
-            width: 90px;
-            height: 90px;
+            width: 100px;
+            height: 100px;
             object-fit: contain;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+            filter: drop-shadow(0 6px 10px rgba(0,0,0,0.6));
+            transition: transform 0.2s ease, filter 0.2s ease;
+        }
+
+        .card.completed .sprite-img {
+            filter: drop-shadow(0 6px 10px rgba(0,0,0,0.6)) brightness(0.7);
+        }
+
+        .card:hover .sprite-img {
+            transform: scale(1.08);
+        }
+
+        .owned-stamp {
+            position: absolute;
+            top: 48%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-10deg);
+            background: #10b981;
+            color: #ffffff;
+            font-weight: 900;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 2px solid #ffffff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+            z-index: 3;
+            pointer-events: none;
+            text-transform: uppercase;
+            animation: popIn 0.2s ease-out;
+        }
+
+        @keyframes popIn {
+            0% { transform: translate(-50%, -50%) scale(0.6) rotate(-10deg); opacity: 0; }
+            100% { transform: translate(-50%, -50%) scale(1) rotate(-10deg); opacity: 1; }
         }
 
         .badge {
             position: absolute;
             top: 6px;
             right: 6px;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.75);
             padding: 2px 6px;
             border-radius: 8px;
             font-size: 0.7rem;
             font-weight: bold;
+            z-index: 2;
+        }
+
+        .card.completed .badge {
+            background: #10b981;
+            color: #fff;
         }
 
         .card-name {
@@ -186,7 +233,8 @@
             left: 6px;
             font-size: 0.85rem;
             font-weight: 800;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+            z-index: 2;
         }
 
         .card-variants-bar {
@@ -276,6 +324,10 @@
             color: white;
         }
 
+        #file-input {
+            display: none;
+        }
+
         @media (min-width: 600px) {
             .grid {
                 grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -283,6 +335,16 @@
 
             .card-preview {
                 height: 160px;
+            }
+
+            .sprite-img {
+                width: 120px;
+                height: 120px;
+            }
+
+            .owned-stamp {
+                font-size: 0.95rem;
+                padding: 5px 12px;
             }
         }
     </style>
@@ -300,7 +362,9 @@
             </div>
             <div class="controls">
                 <input type="text" id="search" class="search-input" placeholder="Search..." oninput="renderGrid()">
-                <button class="btn btn-reset" onclick="resetAll()">Reset</button>
+                <button class="btn btn-upload" onclick="triggerAdminUpload()">🔒 Admin Sheet</button>
+                <input type="file" id="file-input" accept="image/*" onchange="processSpriteSheet(event)">
+                <button class="btn btn-reset" onclick="resetAll()">Reset Progress</button>
             </div>
         </div>
     </header>
@@ -315,6 +379,13 @@
     </div>
 
     <script>
+        // CONFIGURATION: Set your password and JSONBin credentials here
+        const ADMIN_PASSWORD = "COOPEROPCOOLS";
+        const JSONBIN_ID = "6a665183f5f4af5e29c463bf";
+        const JSONBIN_KEY = "$2a$10$jOIt8vSgfNaQzBwTtZZBOuIam3PeIpoDIaY8eSMCXpsKLNtNK9yfK";
+
+        let globalBaseSheet = {};
+
         const variantMeta = {
             base: { label: 'Base', className: 'base' },
             holofoil: { label: 'Holofoil', className: 'holofoil' },
@@ -332,31 +403,114 @@
             return variantMeta[key]?.className || key;
         }
 
-         const spritesData = [
-            { id: 'zeropoint', name: 'Zero Point', variants: ['base', 'gold', 'gummy', 'galaxy'], bg: '#0c4a6e' },
-            { id: 'burntpeanut', name: 'Burnt Peanut', variants: ['base'], bg: '#451a03' },
-            { id: 'batman', name: 'Batman', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil', 'cube'], bg: '#171717' },
-            { id: 'pollo', name: 'Pollo', variants: ['base'], bg: '#854d0e' },
-            { id: 'vinijr', name: 'Vini JR', variants: ['base'], bg: '#14532d' },
-            { id: 'dream', name: 'Dream', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], bg: '#9a3412' },
-            { id: 'punk', name: 'Punk', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], bg: '#431407' },
-            { id: 'boss', name: 'Boss', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], bg: '#ea580c' },
-            { id: 'seven', name: 'The Seven', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], bg: '#1e293b' },
-            { id: 'grim', name: 'Grim Reaper', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], bg: '#18181b' },
-            { id: 'demon', name: 'Demon', variants: ['base', 'gold', 'gummy', 'galaxy'], bg: '#450a0a' },
-            { id: 'king', name: 'King', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], bg: '#3b0764' },
-            { id: 'aura', name: 'Aura', variants: ['base', 'gold', 'gummy', 'galaxy'], bg: '#1e1b4b' },
-            { id: 'striker', name: 'Striker', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], bg: '#1e3a8a' },
-            { id: 'fire', name: 'Fire', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil', 'cube'], bg: '#911b1b' },
-            { id: 'earth', name: 'Earth', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], bg: '#166534' },
-            { id: 'water', name: 'Water', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], bg: '#0284c7' },
-            { id: 'ghost', name: 'Ghost', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], bg: '#581c87' },
-            { id: 'duck', name: 'Duck', variants: ['base', 'gold', 'gummy', 'galaxy'], bg: '#701a75' },
-            { id: 'air', name: 'Air', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], bg: '#334155' },
-            { id: 'fishy', name: 'Fishy', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], bg: '#075985' }
+        const spritesData = [
+            // Row 1
+            { id: 'batman', name: 'Batman', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil', 'cube'], bg: '#3a3413', row: 0, col: 0 },
+            { id: 'water', name: 'Water', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], bg: '#0d324d', row: 0, col: 1 },
+            { id: 'earth', name: 'Earth', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], bg: '#172e21', row: 0, col: 2 },
+            { id: 'fire', name: 'Fire', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil', 'cube'], bg: '#3a2012', row: 0, col: 3 },
+            { id: 'duck', name: 'Duck', variants: ['base', 'gold', 'gummy', 'galaxy'], bg: '#33173d', row: 0, col: 4 },
+            { id: 'ghost', name: 'Ghost', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], bg: '#35183f', row: 0, col: 5 },
+            // Row 2
+            { id: 'dream', name: 'Dream', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], bg: '#402011', row: 1, col: 0 },
+            { id: 'demon', name: 'Demon', variants: ['base', 'gold', 'gummy', 'galaxy'], bg: '#2b1535', row: 1, col: 1 },
+            { id: 'punk', name: 'Punk', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], bg: '#45200d', row: 1, col: 2 },
+            { id: 'king', name: 'King', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], bg: '#1f1b31', row: 1, col: 3 },
+            { id: 'burntpeanut', name: 'Burnt Peanut', variants: ['base'], bg: '#432e12', row: 1, col: 4 },
+            { id: 'vinijr', name: 'Vini Jr.', variants: ['base'], bg: '#423612', row: 1, col: 5 },
+            // Row 3
+            { id: 'zeropoint', name: 'Zero Point', variants: ['base', 'gold', 'gummy', 'galaxy'], bg: '#3a3212', row: 2, col: 0 },
+            { id: 'fishy', name: 'Fishy', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], bg: '#0e2b40', row: 2, col: 1 },
+            { id: 'striker', name: 'Striker', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], bg: '#2d183d', row: 2, col: 2 },
+            { id: 'aura', name: 'Aura', variants: ['base', 'gold', 'gummy', 'galaxy'], bg: '#221931', row: 2, col: 3 },
+            { id: 'boss', name: 'Boss', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], bg: '#412211', row: 2, col: 4 },
+            { id: 'grim', name: 'Grim', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], bg: '#3d3413', row: 2, col: 5 },
+            // Row 4
+            { id: 'air', name: 'Air', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], bg: '#0e2b43', row: 3, col: 0 },
+            { id: 'seven', name: 'Seven', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], bg: '#3b2413', row: 3, col: 1 },
+            { id: 'pollo', name: 'Pollo', variants: ['base'], bg: '#3a3413', row: 3, col: 2 }
         ];
 
         const totalTrackedVariants = spritesData.reduce((total, sprite) => total + sprite.variants.length, 0);
+
+        // FETCH SHARED SHEET FROM CLOUD
+        async function fetchGlobalSheet() {
+            if (!JSONBIN_ID || JSONBIN_ID.includes("YOUR_BIN_ID")) return;
+            try {
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest`, {
+                    headers: { 'X-Master-Key': JSONBIN_KEY }
+                });
+                const data = await res.json();
+                if (data.record && typeof data.record === 'object') {
+                    globalBaseSheet = data.record;
+                    renderGrid();
+                }
+            } catch (err) {
+                console.error("Failed to load global sprite sheet:", err);
+            }
+        }
+
+        // SAVE SHARED SHEET TO CLOUD
+        async function saveGlobalSheet() {
+            if (!JSONBIN_ID || JSONBIN_ID.includes("YOUR_BIN_ID")) return;
+            try {
+                await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': JSONBIN_KEY
+                    },
+                    body: JSON.stringify(globalBaseSheet)
+                });
+                alert("Base sheet successfully updated live for everyone!");
+            } catch (err) {
+                alert("Failed to sync sheet to cloud.");
+            }
+        }
+
+        function triggerAdminUpload() {
+            const pwd = prompt("Enter Admin Password to update sheet for everyone:");
+            if (pwd === ADMIN_PASSWORD) {
+                document.getElementById('file-input').click();
+            } else if (pwd !== null) {
+                alert("Incorrect password!");
+            }
+        }
+
+        function processSpriteSheet(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    const cols = 6;
+                    const rows = 4;
+
+                    const cellW = img.width / cols;
+                    const cellH = img.height / rows;
+
+                    spritesData.forEach(sprite => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = 160;
+                        canvas.height = 160;
+                        const ctx = canvas.getContext('2d');
+
+                        const sx = sprite.col * cellW;
+                        const sy = sprite.row * cellH;
+
+                        ctx.drawImage(img, sx, sy, cellW, cellH, 0, 0, 160, 160);
+                        globalBaseSheet[sprite.id] = canvas.toDataURL('image/png');
+                    });
+
+                    renderGrid();
+                    saveGlobalSheet();
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
 
         function loadProgress() {
             try {
@@ -374,7 +528,6 @@
 
                 return normalized;
             } catch (error) {
-                console.warn('Could not load tracker progress:', error);
                 return {};
             }
         }
@@ -396,9 +549,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160">
                     <rect width="160" height="160" rx="24" fill="${sprite.bg}" />
                     <circle cx="80" cy="64" r="34" fill="rgba(255,255,255,0.16)" />
-                    <path d="M80 30c-16 0-29 13-29 29 0 17.2 13.3 29.4 29 29.4s29-12.2 29-29.4c0-16-13-29-29-29Z" fill="rgba(255,255,255,0.22)" />
-                    <rect x="46" y="94" width="68" height="24" rx="12" fill="rgba(0,0,0,0.28)" />
-                    <text x="80" y="110" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="24" font-weight="700" fill="#fff">${initials}</text>
+                    <text x="80" y="73" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="28" font-weight="800" fill="#fff">${initials}</text>
                 </svg>
             `;
 
@@ -424,8 +575,10 @@
 
                 if (searchVal && !sprite.name.toLowerCase().includes(searchVal)) return;
 
+                const isCompleted = max > 0 && owned.length === max;
+
                 const card = document.createElement('div');
-                card.className = `card ${owned.length === max ? 'completed' : ''}`;
+                card.className = `card ${isCompleted ? 'completed' : ''}`;
                 card.onclick = () => openModal(sprite.id);
 
                 let dots = '';
@@ -434,10 +587,14 @@
                     dots += `<div class="v-dot ${activeClass}"></div>`;
                 });
 
+                const imgSrc = globalBaseSheet[sprite.id] || buildSpriteSvg(sprite);
+                const ownedStampHtml = isCompleted ? `<div class="owned-stamp">OWNED</div>` : '';
+
                 card.innerHTML = `
                     <div class="card-preview" style="background: ${sprite.bg}">
                         <div class="badge">${owned.length}/${max}</div>
-                        <img class="sprite-img" src="${buildSpriteSvg(sprite)}" alt="${sprite.name}">
+                        <img class="sprite-img" src="${imgSrc}" alt="${sprite.name}">
+                        ${ownedStampHtml}
                         <div class="card-name">${sprite.name}</div>
                     </div>
                     <div class="card-variants-bar">${dots}</div>
@@ -500,13 +657,15 @@
         }
 
         function resetAll() {
-            if (confirm('Reset all progress?')) {
+            if (confirm('Reset your progress?')) {
                 userProgress = {};
                 localStorage.removeItem('fn_sprite_v1');
                 renderGrid();
             }
         }
 
+        // Initialize and fetch global cloud sheet
+        fetchGlobalSheet();
         renderGrid();
     </script>
 </body>
