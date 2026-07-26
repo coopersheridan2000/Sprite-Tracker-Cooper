@@ -3,36 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    
-    <!-- Mobile Web App Capability -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#0b0c16">
-    
-    <title>Sprite Tracker</title>
+    <title>Fortnite Sprite Tracker</title>
     <style>
         :root {
             --bg-color: #0b0c16;
             --card-bg: #141628;
             --card-border: #232745;
             --accent-purple: #8b5cf6;
-            --accent-blue: #06b6d4;
             --text-color: #ffffff;
             --text-dim: #8f96b3;
-            
+
             --v-base: #3b82f6;
-            --v-gold: #f59e0b;
-            --v-gummy: #ec4899;
-            --v-cube: #10b981;
+            --v-gold: #facc15;
+            --v-holofoil: #2dd4bf;
+            --v-gummy: #f472b6;
+            --v-cube: #9333ea;
             --v-galaxy: #6366f1;
-            --v-special: #f43f5e;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
         }
@@ -41,12 +34,7 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             min-height: 100vh;
-            padding: 15px;
-            /* Support modern notch screens */
-            padding-top: max(15px, env(safe-area-inset-top));
-            padding-bottom: max(20px, env(safe-area-inset-bottom));
-            padding-left: max(15px, env(safe-area-inset-left));
-            padding-right: max(15px, env(safe-area-inset-right));
+            padding: max(15px, env(safe-area-inset-top)) max(15px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(15px, env(safe-area-inset-left));
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -64,7 +52,7 @@
             letter-spacing: 1px;
             text-transform: uppercase;
             margin-bottom: 12px;
-            background: linear-gradient(90deg, #06b6d4, #a855f7, #ec4899);
+            background: linear-gradient(90deg, #facc15, #8b5cf6, #2dd4bf);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -100,7 +88,7 @@
         .progress-inner {
             height: 100%;
             width: 0%;
-            background: linear-gradient(90deg, #06b6d4, #a855f7, #ec4899);
+            background: linear-gradient(90deg, #8b5cf6, #2dd4bf);
             transition: width 0.3s ease;
         }
 
@@ -120,11 +108,6 @@
             outline: none;
             flex-grow: 1;
             font-size: 0.95rem;
-            min-width: 140px;
-        }
-
-        .search-input:focus {
-            border-color: var(--accent-purple);
         }
 
         .btn {
@@ -136,24 +119,13 @@
             cursor: pointer;
             font-weight: 600;
             font-size: 0.9rem;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .btn:active {
-            transform: scale(0.97);
-            background: var(--card-border);
         }
 
         .btn-reset {
-            background: #3b141e;
-            border-color: #611e2d;
             color: #ff6b81;
+            border-color: #611e2d;
         }
 
-        /* Grid - Mobile Responsive Dynamic Columns */
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
@@ -162,7 +134,6 @@
             max-width: 1000px;
         }
 
-        /* Card */
         .card {
             background: var(--card-bg);
             border: 2px solid var(--card-border);
@@ -170,10 +141,8 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            position: relative;
             cursor: pointer;
-            transition: transform 0.15s ease, border-color 0.15s ease;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: 0.1s;
         }
 
         .card:active {
@@ -191,234 +160,146 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background-size: cover;
-            background-position: center;
         }
 
         .sprite-img {
-            max-width: 90px;
-            max-height: 90px;
+            width: 90px;
+            height: 90px;
             object-fit: contain;
-            filter: drop-shadow(0 6px 8px rgba(0,0,0,0.6));
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
         }
 
         .badge {
             position: absolute;
             top: 6px;
             right: 6px;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(4px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: #fff;
+            background: rgba(0, 0, 0, 0.7);
             padding: 2px 6px;
-            border-radius: 10px;
+            border-radius: 8px;
             font-size: 0.7rem;
-            font-weight: 800;
+            font-weight: bold;
         }
 
         .card-name {
             position: absolute;
             bottom: 6px;
             left: 6px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 800;
-            color: #ffffff;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
 
-        /* Dot Indicators */
         .card-variants-bar {
             background: #0f1120;
-            padding: 6px 4px;
+            padding: 8px 4px;
             display: flex;
             justify-content: center;
-            gap: 4px;
+            gap: 5px;
             border-top: 1px solid var(--card-border);
-            flex-wrap: wrap;
         }
 
         .v-dot {
-            width: 7px;
-            height: 7px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
             background: #232745;
-            transition: background 0.2s, transform 0.2s;
         }
 
         .v-dot.active-base { background: var(--v-base); box-shadow: 0 0 5px var(--v-base); }
         .v-dot.active-gold { background: var(--v-gold); box-shadow: 0 0 5px var(--v-gold); }
+        .v-dot.active-holofoil { background: var(--v-holofoil); box-shadow: 0 0 5px var(--v-holofoil); }
         .v-dot.active-gummy { background: var(--v-gummy); box-shadow: 0 0 5px var(--v-gummy); }
         .v-dot.active-cube { background: var(--v-cube); box-shadow: 0 0 5px var(--v-cube); }
         .v-dot.active-galaxy { background: var(--v-galaxy); box-shadow: 0 0 5px var(--v-galaxy); }
-        .v-dot.active-special { background: var(--v-special); box-shadow: 0 0 5px var(--v-special); }
 
-        /* Modal Overlay */
         .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(6px);
-            display: flex;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(5px);
+            display: none;
             align-items: center;
             justify-content: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s ease;
             z-index: 100;
-            padding: 20px;
         }
 
         .modal-overlay.active {
-            opacity: 1;
-            pointer-events: all;
+            display: flex;
         }
 
         .modal {
             background: #141628;
-            border: 1px solid #333863;
-            border-radius: 16px;
-            width: 100%;
+            width: 90%;
             max-width: 400px;
+            border-radius: 16px;
             padding: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--card-border);
-            padding-bottom: 10px;
-        }
-
-        .modal-header h2 {
-            font-size: 1.25rem;
-        }
-
-        .modal-close {
-            background: transparent;
-            border: none;
-            color: var(--text-dim);
-            font-size: 1.8rem;
-            cursor: pointer;
-            padding: 0 8px;
-            line-height: 1;
-        }
-
-        .variant-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            max-height: 60vh;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
         }
 
         .variant-item {
             display: flex;
             align-items: center;
             justify-content: space-between;
+            padding: 12px;
+            margin-bottom: 8px;
             background: #0f1120;
+            border-radius: 8px;
             border: 1px solid var(--card-border);
-            padding: 10px 14px;
-            border-radius: 10px;
             cursor: pointer;
-            transition: all 0.2s;
-            min-height: 48px; /* Tappable height for fingers */
-        }
-
-        .variant-item:active {
-            background: #181b30;
         }
 
         .variant-item.checked {
             border-color: var(--accent-purple);
-            background: rgba(139, 92, 246, 0.15);
-        }
-
-        .variant-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-
-        .variant-thumb {
-            width: 32px;
-            height: 32px;
-            object-fit: contain;
-            border-radius: 4px;
+            background: rgba(139, 92, 246, 0.1);
         }
 
         .checkbox {
-            width: 22px;
-            height: 22px;
-            border-radius: 6px;
+            width: 20px;
+            height: 20px;
             border: 2px solid var(--card-border);
+            border-radius: 4px;
+        }
+
+        .checked .checkbox {
+            background: var(--accent-purple);
+            border-color: var(--accent-purple);
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s;
-            flex-shrink: 0;
         }
 
-        .variant-item.checked .checkbox {
-            background: var(--accent-purple);
-            border-color: var(--accent-purple);
-        }
-
-        .checkbox::after {
+        .checked .checkbox::after {
             content: '✓';
-            color: #fff;
-            font-size: 13px;
-            display: none;
+            font-size: 12px;
+            color: white;
         }
 
-        .variant-item.checked .checkbox::after {
-            display: block;
-        }
-
-        /* Responsive Desktop adjustments */
         @media (min-width: 600px) {
             .grid {
                 grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-                gap: 16px;
             }
+
             .card-preview {
                 height: 160px;
-            }
-            .sprite-img {
-                max-width: 110px;
-                max-height: 110px;
-            }
-            h1 {
-                font-size: 2.2rem;
             }
         }
     </style>
 </head>
 <body>
-
     <header>
         <h1>Sprite Tracker</h1>
         <div class="stats-bar">
             <div class="stats-info">
                 <span>COLLECTED</span>
-                <span id="progress-text">0 / 91 (0%)</span>
+                <span id="progress-text">0 / 0 (0%)</span>
             </div>
             <div class="progress-outer">
                 <div class="progress-inner" id="progress-bar"></div>
             </div>
             <div class="controls">
-                <input type="text" id="search" class="search-input" placeholder="Search sprite..." oninput="filterSprites()">
-                <button class="btn" onclick="toggleFilterCompleted()" id="filter-btn">Show All</button>
+                <input type="text" id="search" class="search-input" placeholder="Search..." oninput="renderGrid()">
                 <button class="btn btn-reset" onclick="resetAll()">Reset</button>
             </div>
         </div>
@@ -426,189 +307,202 @@
 
     <div class="grid" id="sprite-grid"></div>
 
-    <!-- Modal for Variant Selection -->
     <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
         <div class="modal">
-            <div class="modal-header">
-                <h2 id="modal-title">Sprite Name</h2>
-                <button class="modal-close" onclick="closeModalDirect()">&times;</button>
-            </div>
-            <div class="variant-list" id="variant-list"></div>
+            <h2 id="modal-title" style="margin-bottom: 15px;">Variants</h2>
+            <div id="variant-list"></div>
         </div>
     </div>
 
     <script>
-        // Set path anchor in browser address bar
-        if (!window.location.hash) {
-            history.replaceState(null, '', '#sprite-tracker');
+        const variantMeta = {
+            base: { label: 'Base', className: 'base' },
+            holofoil: { label: 'Holofoil', className: 'holofoil' },
+            gold: { label: 'Gold', className: 'gold' },
+            gummy: { label: 'Gummy', className: 'gummy' },
+            cube: { label: 'Cube', className: 'cube' },
+            galaxy: { label: 'Galaxy', className: 'galaxy' }
+        };
+
+        function getVariantLabel(key) {
+            return variantMeta[key]?.label || key;
         }
 
-        const V1 = ['Base'];
-        const V4 = ['Base', 'Gold', 'Gummy', 'Galaxy'];
-        const V5 = ['Base', 'Gold', 'Gummy', 'Cube', 'Galaxy'];
-        const V6 = ['Base', 'Gold', 'Gummy', 'Cube', 'Galaxy', 'Special'];
+        function getVariantClassKey(key) {
+            return variantMeta[key]?.className || key;
+        }
 
-        const spritesData = [
-            { id: 'aura', name: 'Aura', variants: V4, bg: 'linear-gradient(135deg, #1e1b4b, #4338ca)', img: 'images/aura_base.png' },
-            { id: 'boss', name: 'Boss', variants: V5, bg: 'linear-gradient(135deg, #ea580c, #f97316)', img: 'images/boss_base.png' },
-            { id: 'grim', name: 'Grim', variants: V5, bg: 'linear-gradient(135deg, #18181b, #52525b)', img: 'images/grim_base.png' },
-            { id: 'water', name: 'Water', variants: V5, bg: 'linear-gradient(135deg, #0284c7, #38bdf8)', img: 'images/water_base.png' },
-            { id: 'earth', name: 'Earth', variants: V5, bg: 'linear-gradient(135deg, #0284c7, #38bdf8)', img: 'images/earth_base.png' },
-            { id: 'fire', name: 'Fire', variants: V6, bg: 'linear-gradient(135deg, #0284c7, #38bdf8)', img: 'images/fire_base.png' },
-            { id: 'ghost', name: 'Ghost', variants: V5, bg: 'linear-gradient(135deg, #581c87, #c084fc)', img: 'images/ghost_base.png' },
-            { id: 'striker', name: 'Striker', variants: V5, bg: 'linear-gradient(135deg, #1e3a8a, #3b82f6)', img: 'images/striker_base.png' },
-            { id: 'duck', name: 'Duck', variants: V4, bg: 'linear-gradient(135deg, #581c87, #c084fc)', img: 'images/duck_base.png' },
-            { id: 'dream', name: 'Dream', variants: V5, bg: 'linear-gradient(135deg, #ea580c, #fb923c)', img: 'images/dream_base.png' },
-            { id: 'punk', name: 'Punk', variants: V5, bg: 'linear-gradient(135deg, #ea580c, #f97316)', img: 'images/punk_base.png' },
-            { id: 'king', name: 'King', variants: V5, bg: 'linear-gradient(135deg, #581c87, #c084fc)', img: 'images/king_base.png' },
-            { id: 'zeropoint', name: 'Zero Point', variants: V4, bg: 'linear-gradient(135deg, #eab308, #facc15)', img: 'images/zeropoint_base.png' },
-            { id: 'demon', name: 'Demon', variants: V4, bg: 'linear-gradient(135deg, #581c87, #c084fc)', img: 'images/demon_base.png' },
-            { id: 'fishy', name: 'Fishy', variants: V5, bg: 'linear-gradient(135deg, #0284c7, #38bdf8)', img: 'images/fishy_base.png' },
-            { id: 'batman', name: 'Batman', variants: V6, bg: 'linear-gradient(135deg, #eab308, #facc15)', img: 'images/batman_base.png' },
-            { id: 'vinijr', name: 'Vini JR', variants: V1, bg: 'linear-gradient(135deg, #eab308, #facc15)', img: 'images/vinijr_base.png' },
-            { id: 'air', name: 'Air', variants: V5, bg: 'linear-gradient(135deg, #0284c7, #38bdf8)', img: 'images/air_base.png' },
-            { id: 'pollo', name: 'Pollo', variants: V1, bg: 'linear-gradient(135deg, #eab308, #facc15)', img: 'images/pollo_base.png' },
-            { id: 'seven', name: 'Seven', variants: V5, bg: 'linear-gradient(135deg, #ea580c, #f97316)', img: 'images/seven_base.png' },
-            { id: 'burntpeanut', name: 'Burnt Peanut', variants: V1, bg: 'linear-gradient(135deg, #eab308, #facc15)', img: 'images/burntpeanut_base.png' }
+         const spritesData = [
+            { id: 'zeropoint', name: 'Zero Point', variants: ['base', 'gold', 'gummy', 'galaxy'], bg: '#0c4a6e' },
+            { id: 'burntpeanut', name: 'Burnt Peanut', variants: ['base'], bg: '#451a03' },
+            { id: 'batman', name: 'Batman', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil', 'cube'], bg: '#171717' },
+            { id: 'pollo', name: 'Pollo', variants: ['base'], bg: '#854d0e' },
+            { id: 'vinijr', name: 'Vini JR', variants: ['base'], bg: '#14532d' },
+            { id: 'dream', name: 'Dream', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], bg: '#9a3412' },
+            { id: 'punk', name: 'Punk', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], bg: '#431407' },
+            { id: 'boss', name: 'Boss', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], bg: '#ea580c' },
+            { id: 'seven', name: 'The Seven', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], bg: '#1e293b' },
+            { id: 'grim', name: 'Grim Reaper', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], bg: '#18181b' },
+            { id: 'demon', name: 'Demon', variants: ['base', 'gold', 'gummy', 'galaxy'], bg: '#450a0a' },
+            { id: 'king', name: 'King', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], bg: '#3b0764' },
+            { id: 'aura', name: 'Aura', variants: ['base', 'gold', 'gummy', 'galaxy'], bg: '#1e1b4b' },
+            { id: 'striker', name: 'Striker', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], bg: '#1e3a8a' },
+            { id: 'fire', name: 'Fire', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil', 'cube'], bg: '#911b1b' },
+            { id: 'earth', name: 'Earth', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], bg: '#166534' },
+            { id: 'water', name: 'Water', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], bg: '#0284c7' },
+            { id: 'ghost', name: 'Ghost', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], bg: '#581c87' },
+            { id: 'duck', name: 'Duck', variants: ['base', 'gold', 'gummy', 'galaxy'], bg: '#701a75' },
+            { id: 'air', name: 'Air', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], bg: '#334155' },
+            { id: 'fishy', name: 'Fishy', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], bg: '#075985' }
         ];
 
-        let userProgress = JSON.parse(localStorage.getItem('spriteTrackerExact_91')) || {};
-        let activeSpriteId = null;
-        let hideCompleted = false;
+        const totalTrackedVariants = spritesData.reduce((total, sprite) => total + sprite.variants.length, 0);
 
-        function getVariantImagePath(spriteId, variant) {
-            return `images/${spriteId}_${variant.toLowerCase()}.png`;
+        function loadProgress() {
+            try {
+                const stored = JSON.parse(localStorage.getItem('fn_sprite_v1'));
+                if (!stored || typeof stored !== 'object') return {};
+
+                const normalized = {};
+                Object.entries(stored).forEach(([spriteId, ownedVariants]) => {
+                    const sprite = spritesData.find(s => s.id === spriteId);
+                    if (!sprite || !Array.isArray(ownedVariants)) return;
+
+                    const valid = ownedVariants.filter(v => sprite.variants.includes(v));
+                    if (valid.length) normalized[spriteId] = valid;
+                });
+
+                return normalized;
+            } catch (error) {
+                console.warn('Could not load tracker progress:', error);
+                return {};
+            }
         }
+
+        function saveProgress() {
+            localStorage.setItem('fn_sprite_v1', JSON.stringify(userProgress));
+        }
+
+        function buildSpriteSvg(sprite) {
+            const initials = sprite.name
+                .split(/[\s-]+/)
+                .filter(Boolean)
+                .slice(0, 2)
+                .map(word => word[0])
+                .join('')
+                .toUpperCase() || 'SP';
+
+            const svg = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160">
+                    <rect width="160" height="160" rx="24" fill="${sprite.bg}" />
+                    <circle cx="80" cy="64" r="34" fill="rgba(255,255,255,0.16)" />
+                    <path d="M80 30c-16 0-29 13-29 29 0 17.2 13.3 29.4 29 29.4s29-12.2 29-29.4c0-16-13-29-29-29Z" fill="rgba(255,255,255,0.22)" />
+                    <rect x="46" y="94" width="68" height="24" rx="12" fill="rgba(0,0,0,0.28)" />
+                    <text x="80" y="110" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="24" font-weight="700" fill="#fff">${initials}</text>
+                </svg>
+            `;
+
+            return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+        }
+
+        let userProgress = loadProgress();
 
         function renderGrid() {
             const grid = document.getElementById('sprite-grid');
             const searchVal = document.getElementById('search').value.toLowerCase();
             grid.innerHTML = '';
 
+            let totalOwned = 0;
+            let totalMax = 0;
+
             spritesData.forEach(sprite => {
-                const ownedVariants = userProgress[sprite.id] || [];
-                const count = ownedVariants.length;
+                const owned = userProgress[sprite.id] || [];
                 const max = sprite.variants.length;
-                const isCompleted = count >= max;
+
+                totalMax += max;
+                totalOwned += owned.length;
 
                 if (searchVal && !sprite.name.toLowerCase().includes(searchVal)) return;
-                if (hideCompleted && isCompleted) return;
 
                 const card = document.createElement('div');
-                card.className = `card ${isCompleted ? 'completed' : ''}`;
+                card.className = `card ${owned.length === max ? 'completed' : ''}`;
                 card.onclick = () => openModal(sprite.id);
 
-                let dotsHtml = '<div class="card-variants-bar">';
+                let dots = '';
                 sprite.variants.forEach(v => {
-                    const isOwned = ownedVariants.includes(v);
-                    dotsHtml += `<div class="v-dot ${isOwned ? 'active-' + v.toLowerCase() : ''}"></div>`;
+                    const activeClass = owned.includes(v) ? `active-${getVariantClassKey(v)}` : '';
+                    dots += `<div class="v-dot ${activeClass}"></div>`;
                 });
-                dotsHtml += '</div>';
 
                 card.innerHTML = `
                     <div class="card-preview" style="background: ${sprite.bg}">
-                        <div class="badge">${count}/${max}</div>
-                        <img class="sprite-img" src="${sprite.img}" alt="${sprite.name}" onerror="this.src='https://via.placeholder.com/100/141628/ffffff?text=${sprite.name}'">
+                        <div class="badge">${owned.length}/${max}</div>
+                        <img class="sprite-img" src="${buildSpriteSvg(sprite)}" alt="${sprite.name}">
                         <div class="card-name">${sprite.name}</div>
                     </div>
-                    ${dotsHtml}
+                    <div class="card-variants-bar">${dots}</div>
                 `;
 
                 grid.appendChild(card);
             });
 
-            updateOverallStats();
+            const percent = totalMax > 0 ? Math.round((totalOwned / totalMax) * 100) : 0;
+            document.getElementById('progress-text').innerText = `${totalOwned} / ${totalTrackedVariants} (${percent}%)`;
+            document.getElementById('progress-bar').style.width = `${percent}%`;
         }
 
         function openModal(id) {
-            activeSpriteId = id;
             const sprite = spritesData.find(s => s.id === id);
             if (!sprite) return;
 
-            document.getElementById('modal-title').innerText = `${sprite.name} Variants`;
-            const listEl = document.getElementById('variant-list');
-            listEl.innerHTML = '';
+            document.getElementById('modal-title').innerText = sprite.name;
+            const list = document.getElementById('variant-list');
+            list.innerHTML = '';
 
-            const ownedVariants = userProgress[id] || [];
-
-            sprite.variants.forEach(variant => {
-                const isChecked = ownedVariants.includes(variant);
+            const owned = userProgress[id] || [];
+            sprite.variants.forEach(v => {
                 const item = document.createElement('div');
-                item.className = `variant-item ${isChecked ? 'checked' : ''}`;
-                item.onclick = () => toggleVariant(id, variant);
+                item.className = `variant-item ${owned.includes(v) ? 'checked' : ''}`;
+                item.onclick = () => {
+                    toggleVariant(id, v);
+                    openModal(id);
+                };
 
-                const vImgSrc = getVariantImagePath(id, variant);
-
-                item.innerHTML = `
-                    <div class="variant-info">
-                        <img class="variant-thumb" src="${vImgSrc}" onerror="this.src='https://via.placeholder.com/40/232745/ffffff?text=${variant[0]}'">
-                        <span>${variant}</span>
-                    </div>
-                    <div class="checkbox"></div>
-                `;
-                listEl.appendChild(item);
+                item.innerHTML = `<span>${getVariantLabel(v)} Style</span><div class="checkbox"></div>`;
+                list.appendChild(item);
             });
 
             document.getElementById('modal-overlay').classList.add('active');
         }
 
-        function toggleVariant(spriteId, variant) {
-            if (!userProgress[spriteId]) {
-                userProgress[spriteId] = [];
-            }
+        function toggleVariant(id, v) {
+            if (!userProgress[id]) userProgress[id] = [];
 
-            const index = userProgress[spriteId].indexOf(variant);
-            if (index > -1) {
-                userProgress[spriteId].splice(index, 1);
+            const idx = userProgress[id].indexOf(v);
+            if (idx > -1) {
+                userProgress[id].splice(idx, 1);
             } else {
-                userProgress[spriteId].push(variant);
+                userProgress[id].push(v);
             }
 
-            localStorage.setItem('spriteTrackerExact_91', JSON.stringify(userProgress));
-            openModal(spriteId);
-            renderGrid();
-        }
-
-        function closeModal(event) {
-            if (event.target.id === 'modal-overlay') {
-                closeModalDirect();
+            if (userProgress[id].length === 0) {
+                delete userProgress[id];
             }
-        }
 
-        function closeModalDirect() {
-            document.getElementById('modal-overlay').classList.remove('active');
-            activeSpriteId = null;
-        }
-
-        function updateOverallStats() {
-            let totalObtained = 0;
-            const totalMax = 91;
-
-            spritesData.forEach(sprite => {
-                totalObtained += (userProgress[sprite.id] || []).length;
-            });
-
-            const percentage = Math.round((totalObtained / totalMax) * 100);
-            document.getElementById('progress-text').innerText = `${totalObtained} / ${totalMax} (${percentage}%)`;
-            document.getElementById('progress-bar').style.width = `${percentage}%`;
-        }
-
-        function filterSprites() {
+            saveProgress();
             renderGrid();
         }
 
-        function toggleFilterCompleted() {
-            hideCompleted = !hideCompleted;
-            const btn = document.getElementById('filter-btn');
-            btn.innerText = hideCompleted ? 'Hide Done' : 'Show All';
-            btn.style.borderColor = hideCompleted ? '#8b5cf6' : 'var(--card-border)';
-            renderGrid();
+        function closeModal(e) {
+            if (e.target.id === 'modal-overlay') {
+                document.getElementById('modal-overlay').classList.remove('active');
+            }
         }
 
         function resetAll() {
-            if (confirm('Are you sure you want to clear all progress?')) {
+            if (confirm('Reset all progress?')) {
                 userProgress = {};
-                localStorage.removeItem('spriteTrackerExact_91');
+                localStorage.removeItem('fn_sprite_v1');
                 renderGrid();
             }
         }
