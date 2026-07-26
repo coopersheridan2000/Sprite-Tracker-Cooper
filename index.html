@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <!-- Mobile Web App Capability -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0b0c16">
+    
+    <title>Sprite Tracker</title>
+    <style>
+        :root {
+            --bg-color: #0b0c16;
+            --card-bg: #141628;
+            --card-border: #232745;
+            --accent-purple: #8b5cf6;
+            --accent-blue: #06b6d4;
+            --text-color: #ffffff;
+            --text-dim: #8f96b3;
+            
+            --v-base: #3b82f6;
+            --v-gold: #f59e0b;
+            --v-gummy: #ec4899;
+            --v-cube: #10b981;
+            --v-galaxy: #6366f1;
+            --v-special: #f43f5e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            padding: 15px;
+            /* Support modern notch screens */
+            padding-top: max(15px, env(safe-area-inset-top));
+            padding-bottom: max(20px, env(safe-area-inset-bottom));
+            padding-left: max(15px, env(safe-area-inset-left));
+            padding-right: max(15px, env(safe-area-inset-right));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            width: 100%;
+            max-width: 1000px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            background: linear-gradient(90deg, #06b6d4, #a855f7, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stats-bar {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 14px 16px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+        }
+
+        .stats-info {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+
+        .progress-outer {
+            width: 100%;
+            height: 12px;
+            background: #1c2038;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid var(--card-border);
+        }
+
+        .progress-inner {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #06b6d4, #a855f7, #ec4899);
+            transition: width 0.3s ease;
+        }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            background: #1a1d33;
+            border: 1px solid var(--card-border);
+            color: #fff;
+            padding: 10px 14px;
+            border-radius: 8px;
+            outline: none;
+            flex-grow: 1;
+            font-size: 0.95rem;
+            min-width: 140px;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-purple);
+        }
+
+        .btn {
+            background: #1a1d33;
+            border: 1px solid var(--card-border);
+            color: #fff;
+            padding: 10px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+            background: var(--card-border);
+        }
+
+        .btn-reset {
+            background: #3b141e;
+            border-color: #611e2d;
+            color: #ff6b81;
+        }
+
+        /* Grid - Mobile Responsive Dynamic Columns */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+            gap: 12px;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        /* Card */
+        .card {
+            background: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.15s ease, border-color 0.15s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .card:active {
+            transform: scale(0.96);
+        }
+
+        .card.completed {
+            border-color: #10b981;
+        }
+
+        .card-preview {
+            width: 100%;
+            height: 130px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .sprite-img {
+            max-width: 90px;
+            max-height: 90px;
+            object-fit: contain;
+            filter: drop-shadow(0 6px 8px rgba(0,0,0,0.6));
+        }
+
+        .badge {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 800;
+        }
+
+        .card-name {
+            position: absolute;
+            bottom: 6px;
+            left: 6px;
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+        }
+
+        /* Dot Indicators */
+        .card-variants-bar {
+            background: #0f1120;
+            padding: 6px 4px;
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+            border-top: 1px solid var(--card-border);
+            flex-wrap: wrap;
+        }
+
+        .v-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #232745;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .v-dot.active-base { background: var(--v-base); box-shadow: 0 0 5px var(--v-base); }
+        .v-dot.active-gold { background: var(--v-gold); box-shadow: 0 0 5px var(--v-gold); }
+        .v-dot.active-gummy { background: var(--v-gummy); box-shadow: 0 0 5px var(--v-gummy); }
+        .v-dot.active-cube { background: var(--v-cube); box-shadow: 0 0 5px var(--v-cube); }
+        .v-dot.active-galaxy { background: var(--v-galaxy); box-shadow: 0 0 5px var(--v-galaxy); }
+        .v-dot.active-special { background: var(--v-special); box-shadow: 0 0 5px var(--v-special); }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 100;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal {
+            background: #141628;
+            border: 1px solid #333863;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 10px;
+        }
+
+        .modal-header h2 {
+            font-size: 1.25rem;
+        }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            font-size: 1.8rem;
+            cursor: pointer;
+            padding: 0 8px;
+            line-height: 1;
+        }
+
+        .variant-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 60vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .variant-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #0f1120;
+            border: 1px solid var(--card-border);
+            padding: 10px 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-height: 48px; /* Tappable height for fingers */
+        }
+
+        .variant-item:active {
+            background: #181b30;
+        }
+
+        .variant-item.checked {
+            border-color: var(--accent-purple);
+            background: rgba(139, 92, 246, 0.15);
+        }
+
+        .variant-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .variant-thumb {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+
+        .checkbox {
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            border: 2px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .variant-item.checked .checkbox {
+            background: var(--accent-purple);
+            border-color: var(--accent-purple);
+        }
+
+        .checkbox::after {
+            content: '✓';
+            color: #fff;
+            font-size: 13px;
+            display: none;
+        }
+
+        .variant-item.checked .checkbox::after {
+            display: block;
+        }
+
+        /* Responsive Desktop adjustments */
+        @media (min-width: 600px) {
+            .grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 16px;
+            }
+            .card-preview {
+                height: 160px;
+            }
+            .sprite-img {
+                max-width: 110px;
+                max-height: 110px;
+            }
+            h1 {
+                font-size: 2.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Sprite Tracker</h1>
+        <div class="stats-bar">
+            <div class="stats-info">
+                <span>COLLECTED</span>
+                <span id="progress-text">0 / 91 (0%)</span>
+            </div>
+            <div class="progress-outer">
+                <div class="progress-inner" id="progress-bar"></div>
+            </div>
+            <div class="controls">
+                <input type="text" id="search" class="search-input" placeholder="Search sprite..." oninput="filterSprites()">
+                <button class="btn" onclick="toggleFilterCompleted()" id="filter-btn">Show All</button>
+                <button class="btn btn-reset" onclick="resetAll()">Reset</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="grid" id="sprite-grid"></div>
+
+    <!-- Modal for Variant Selection -->
+    <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modal-title">Sprite Name</h2>
+                <button class="modal-close" onclick="closeModalDirect()">&times;</button>
+            </div>
+            <div class="variant-list" id="variant-list"></div>
+        </div>
+    </div>
+
+    <script>
+        // Set path anchor in browser address bar
+        if (!window.location.hash) {
+            history.replaceState(null, '', '#sprite-tracker');
+        }
+
+        const V1 = ['Base'];
+        const V4 = ['Base', 'Gold', 'Gummy', 'Galaxy'];
+        const V5 = ['Base', 'Gold', 'Gummy', 'Cube', 'Galaxy'];
+        const V6 = ['Base', 'Gold', 'Gummy', 'Cube', 'Galaxy', 'Special'];
+
+        const spritesData = [
+            { id: 'aura', name: 'Aura', variants: V4, bg: 'linear-gradient(135deg, #1e1b4b, #4338ca)', img: 'images/aura_base.png' },
+            { id: 'boss', name: 'Boss', variants: V5, bg: 'linear-gradient(135deg, #ea580c, #f97316)', img: 'images/boss_base.png' },
+            { id: 'grim', name: 'Grim', variants: V5, bg: 'linear-gradient(135deg, #18181b, #52525b)', img: 'images/grim_base.png' },
+            { id: 'water', name: 'Water', variants: V5, bg: 'linear-gradient(135deg, #0284c7, #38bdf8)', img: 'images/water_base.png' },
+            { id: 'earth', name: 'Earth', variants: V5, bg: 'linear-gradient(135deg, #0284c7, #38bdf8)', img: 'images/earth_base.png' },
+            { id: 'fire', name: 'Fire', variants: V6, bg: 'linear-gradient(135deg, #0284c7, #38bdf8)', img: 'images/fire_base.png' },
+            { id: 'ghost', name: 'Ghost', variants: V5, bg: 'linear-gradient(135deg, #581c87, #c084fc)', img: 'images/ghost_base.png' },
+            { id: 'striker', name: 'Striker', variants: V5, bg: 'linear-gradient(135deg, #1e3a8a, #3b82f6)', img: 'images/striker_base.png' },
+            { id: 'duck', name: 'Duck', variants: V4, bg: 'linear-gradient(135deg, #581c87, #c084fc)', img: 'images/duck_base.png' },
+            { id: 'dream', name: 'Dream', variants: V5, bg: 'linear-gradient(135deg, #ea580c, #fb923c)', img: 'images/dream_base.png' },
+            { id: 'punk', name: 'Punk', variants: V5, bg: 'linear-gradient(135deg, #ea580c, #f97316)', img: 'images/punk_base.png' },
+            { id: 'king', name: 'King', variants: V5, bg: 'linear-gradient(135deg, #581c87, #c084fc)', img: 'images/king_base.png' },
+            { id: 'zeropoint', name: 'Zero Point', variants: V4, bg: 'linear-gradient(135deg, #eab308, #facc15)', img: 'images/zeropoint_base.png' },
+            { id: 'demon', name: 'Demon', variants: V4, bg: 'linear-gradient(135deg, #581c87, #c084fc)', img: 'images/demon_base.png' },
+            { id: 'fishy', name: 'Fishy', variants: V5, bg: 'linear-gradient(135deg, #0284c7, #38bdf8)', img: 'images/fishy_base.png' },
+            { id: 'batman', name: 'Batman', variants: V6, bg: 'linear-gradient(135deg, #eab308, #facc15)', img: 'images/batman_base.png' },
+            { id: 'vinijr', name: 'Vini JR', variants: V1, bg: 'linear-gradient(135deg, #eab308, #facc15)', img: 'images/vinijr_base.png' },
+            { id: 'air', name: 'Air', variants: V5, bg: 'linear-gradient(135deg, #0284c7, #38bdf8)', img: 'images/air_base.png' },
+            { id: 'pollo', name: 'Pollo', variants: V1, bg: 'linear-gradient(135deg, #eab308, #facc15)', img: 'images/pollo_base.png' },
+            { id: 'seven', name: 'Seven', variants: V5, bg: 'linear-gradient(135deg, #ea580c, #f97316)', img: 'images/seven_base.png' },
+            { id: 'burntpeanut', name: 'Burnt Peanut', variants: V1, bg: 'linear-gradient(135deg, #eab308, #facc15)', img: 'images/burntpeanut_base.png' }
+        ];
+
+        let userProgress = JSON.parse(localStorage.getItem('spriteTrackerExact_91')) || {};
+        let activeSpriteId = null;
+        let hideCompleted = false;
+
+        function getVariantImagePath(spriteId, variant) {
+            return `images/${spriteId}_${variant.toLowerCase()}.png`;
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('sprite-grid');
+            const searchVal = document.getElementById('search').value.toLowerCase();
+            grid.innerHTML = '';
+
+            spritesData.forEach(sprite => {
+                const ownedVariants = userProgress[sprite.id] || [];
+                const count = ownedVariants.length;
+                const max = sprite.variants.length;
+                const isCompleted = count >= max;
+
+                if (searchVal && !sprite.name.toLowerCase().includes(searchVal)) return;
+                if (hideCompleted && isCompleted) return;
+
+                const card = document.createElement('div');
+                card.className = `card ${isCompleted ? 'completed' : ''}`;
+                card.onclick = () => openModal(sprite.id);
+
+                let dotsHtml = '<div class="card-variants-bar">';
+                sprite.variants.forEach(v => {
+                    const isOwned = ownedVariants.includes(v);
+                    dotsHtml += `<div class="v-dot ${isOwned ? 'active-' + v.toLowerCase() : ''}"></div>`;
+                });
+                dotsHtml += '</div>';
+
+                card.innerHTML = `
+                    <div class="card-preview" style="background: ${sprite.bg}">
+                        <div class="badge">${count}/${max}</div>
+                        <img class="sprite-img" src="${sprite.img}" alt="${sprite.name}" onerror="this.src='https://via.placeholder.com/100/141628/ffffff?text=${sprite.name}'">
+                        <div class="card-name">${sprite.name}</div>
+                    </div>
+                    ${dotsHtml}
+                `;
+
+                grid.appendChild(card);
+            });
+
+            updateOverallStats();
+        }
+
+        function openModal(id) {
+            activeSpriteId = id;
+            const sprite = spritesData.find(s => s.id === id);
+            if (!sprite) return;
+
+            document.getElementById('modal-title').innerText = `${sprite.name} Variants`;
+            const listEl = document.getElementById('variant-list');
+            listEl.innerHTML = '';
+
+            const ownedVariants = userProgress[id] || [];
+
+            sprite.variants.forEach(variant => {
+                const isChecked = ownedVariants.includes(variant);
+                const item = document.createElement('div');
+                item.className = `variant-item ${isChecked ? 'checked' : ''}`;
+                item.onclick = () => toggleVariant(id, variant);
+
+                const vImgSrc = getVariantImagePath(id, variant);
+
+                item.innerHTML = `
+                    <div class="variant-info">
+                        <img class="variant-thumb" src="${vImgSrc}" onerror="this.src='https://via.placeholder.com/40/232745/ffffff?text=${variant[0]}'">
+                        <span>${variant}</span>
+                    </div>
+                    <div class="checkbox"></div>
+                `;
+                listEl.appendChild(item);
+            });
+
+            document.getElementById('modal-overlay').classList.add('active');
+        }
+
+        function toggleVariant(spriteId, variant) {
+            if (!userProgress[spriteId]) {
+                userProgress[spriteId] = [];
+            }
+
+            const index = userProgress[spriteId].indexOf(variant);
+            if (index > -1) {
+                userProgress[spriteId].splice(index, 1);
+            } else {
+                userProgress[spriteId].push(variant);
+            }
+
+            localStorage.setItem('spriteTrackerExact_91', JSON.stringify(userProgress));
+            openModal(spriteId);
+            renderGrid();
+        }
+
+        function closeModal(event) {
+            if (event.target.id === 'modal-overlay') {
+                closeModalDirect();
+            }
+        }
+
+        function closeModalDirect() {
+            document.getElementById('modal-overlay').classList.remove('active');
+            activeSpriteId = null;
+        }
+
+        function updateOverallStats() {
+            let totalObtained = 0;
+            const totalMax = 91;
+
+            spritesData.forEach(sprite => {
+                totalObtained += (userProgress[sprite.id] || []).length;
+            });
+
+            const percentage = Math.round((totalObtained / totalMax) * 100);
+            document.getElementById('progress-text').innerText = `${totalObtained} / ${totalMax} (${percentage}%)`;
+            document.getElementById('progress-bar').style.width = `${percentage}%`;
+        }
+
+        function filterSprites() {
+            renderGrid();
+        }
+
+        function toggleFilterCompleted() {
+            hideCompleted = !hideCompleted;
+            const btn = document.getElementById('filter-btn');
+            btn.innerText = hideCompleted ? 'Hide Done' : 'Show All';
+            btn.style.borderColor = hideCompleted ? '#8b5cf6' : 'var(--card-border)';
+            renderGrid();
+        }
+
+        function resetAll() {
+            if (confirm('Are you sure you want to clear all progress?')) {
+                userProgress = {};
+                localStorage.removeItem('spriteTrackerExact_91');
+                renderGrid();
+            }
+        }
+
+        renderGrid();
+    </script>
+</body>
+</html>
