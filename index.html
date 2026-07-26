@@ -660,59 +660,56 @@
         function getVariantClassKey(key) { return variantMeta[key]?.className || key; }
 
         const spritesData = [
-            { 
-                id: 'batman', name: 'Batman', rarity: 'mythic', obtain: 'Defeat Harley Quinn, Poison Ivy, or Catwoman', 
-                variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil', 'cube'], 
-                rates: { base: '2.23%', gold: '0.1%', gummy: '0.07%', galaxy: '0.04%', holofoil: '0.01%', cube: '0%' },
-                bg: '#3a3413', row: 0, col: 0 
-            },
+            // ROW 0
             { 
                 id: 'water', name: 'Water', rarity: 'rare', obtain: 'Found in sprite chests, normal chests, and rare chests', 
                 variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], 
                 rates: { base: '0%', gold: '0.75%', gummy: '0.62%', galaxy: '0.5%', holofoil: '0.25%' },
-                bg: '#0d324d', row: 0, col: 1 
+                bg: '#0d324d', row: 0, col: 0 
             },
             { 
                 id: 'earth', name: 'Earth', rarity: 'rare', obtain: 'Found in sprite chests, normal chests, and rare chests', 
                 variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], 
                 rates: { base: '0%', gold: '0.75%', gummy: '0.62%', galaxy: '0.5%', cube: '0%' },
-                bg: '#172e21', row: 0, col: 2 
+                bg: '#172e21', row: 0, col: 1 
             },
             { 
                 id: 'fire', name: 'Fire', rarity: 'rare', obtain: 'Found in sprite chests, normal chests, and rare chests', 
                 variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil', 'cube'], 
                 rates: { base: '0%', gold: '0.75%', gummy: '0.62%', galaxy: '0.5%', holofoil: '0.25%', cube: '0%' },
-                bg: '#3a2012', row: 0, col: 3 
+                bg: '#3a2012', row: 0, col: 2 
             },
+            { 
+                id: 'fishy', name: 'Fishy', rarity: 'rare', obtain: 'Found in sprite chests, normal chests, and rare chests', 
+                variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], 
+                rates: { base: '0%', gold: '0.75%', gummy: '0.62%', galaxy: '0.5%', cube: '0%' },
+                bg: '#0e2b40', row: 0, col: 3 
+            },
+            { 
+                id: 'air', name: 'Air', rarity: 'rare', obtain: 'Found in sprite chests, normal chests, and rare chests', 
+                variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], 
+                rates: { base: '0%', gold: '0.75%', gummy: '0.62%', galaxy: '0.5%', holofoil: '0.25%' },
+                bg: '#0e2b43', row: 0, col: 4 
+            },
+
+            // ROW 1
             { 
                 id: 'duck', name: 'Duck', rarity: 'epic', obtain: 'Found in sprite chests, normal chests, and rare chests', 
                 variants: ['base', 'gold', 'gummy', 'galaxy'], 
                 rates: { base: '9%', gold: '0.4%', gummy: '0.3%', galaxy: '0.16%' },
-                bg: '#33173d', row: 0, col: 4 
+                bg: '#33173d', row: 1, col: 0 
             },
             { 
                 id: 'ghost', name: 'Ghost', rarity: 'epic', obtain: 'Found in sprite chests, normal chests, and rare chests', 
                 variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], 
                 rates: { base: '9%', gold: '0.4%', gummy: '0.3%', galaxy: '0.16%', holofoil: '0.06%' },
-                bg: '#35183f', row: 0, col: 5 
-            },
-            { 
-                id: 'dream', name: 'Dream', rarity: 'legendary', obtain: 'Complete 3 daily dreamscape challenges or purchase from NPC Slumber.', 
-                variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], 
-                rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%', cube: '0%' },
-                bg: '#402011', row: 1, col: 0 
+                bg: '#35183f', row: 1, col: 1 
             },
             { 
                 id: 'demon', name: 'Demon', rarity: 'epic', obtain: 'Defeat demonic fiends during shadow wave events in infected zones.', 
                 variants: ['base', 'gold', 'gummy', 'galaxy'], 
                 rates: { base: '9%', gold: '0.4%', gummy: '0.3%', galaxy: '0.16%' },
-                bg: '#2b1535', row: 1, col: 1 
-            },
-            { 
-                id: 'punk', name: 'Punk', rarity: 'legendary', obtain: 'Unlocked at Level 50 of the Seasonal Pass or bought in the Item Shop.', 
-                variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], 
-                rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%', cube: '0%' },
-                bg: '#45200d', row: 1, col: 2 
+                bg: '#2b1535', row: 1, col: 2 
             },
             { 
                 id: 'king', name: 'King', rarity: 'epic', obtain: 'Found in sprite chests, normal chests, and rare chests', 
@@ -721,70 +718,82 @@
                 bg: '#1f1b31', row: 1, col: 3 
             },
             { 
-                id: 'burntpeanut', name: 'Burnt Peanut', rarity: 'mythic', obtain: 'Found in sprite chests, normal chests, and rare chests', 
-                variants: ['base'], 
-                rates: { base: '0%' },
-                bg: '#432e12', row: 1, col: 4 
-            },
-            { 
-                id: 'vinijr', name: 'Vini Jr.', rarity: 'mythic', obtain: 'Found in sprite chests, normal chests, and rare chests', 
-                variants: ['base'], 
-                rates: { base: '0%' },
-                bg: '#423612', row: 1, col: 5 
-            },
-            { 
-                id: 'zeropoint', name: 'Zero Point', rarity: 'mythic', obtain: 'Found in sprite chests, normal chests, and rare chests', 
+                id: 'aura', name: 'Aura', rarity: 'epic', obtain: 'Found in sprite chests, normal chests, and rare chests', 
                 variants: ['base', 'gold', 'gummy', 'galaxy'], 
-                rates: { base: '0.00093%', gold: '0.000041%', gummy: '0.000031%', galaxy: '0.000016%' },
-                bg: '#3a3212', row: 2, col: 0 
+                rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%' },
+                bg: '#221931', row: 1, col: 4 
             },
-            { 
-                id: 'fishy', name: 'Fishy', rarity: 'rare', obtain: 'Found in sprite chests, normal chests, and rare chests', 
-                variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], 
-                rates: { base: '0%', gold: '0.75%', gummy: '0.62%', galaxy: '0.5%', cube: '0%' },
-                bg: '#0e2b40', row: 2, col: 1 
-            },
+
+            // ROW 2
             { 
                 id: 'striker', name: 'Striker', rarity: 'epic', obtain: 'Found in sprite chests, normal chests, rare chests, and from kicking a ball in the net at the soccer field', 
                 variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], 
                 rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%', holofoil: '0.05%' },
-                bg: '#2d183d', row: 2, col: 2 
+                bg: '#2d183d', row: 2, col: 0 
             },
             { 
-                id: 'aura', name: 'Aura', rarity: 'epic', obtain: 'Found in sprite chests, normal chests, and rare chests', 
-                variants: ['base', 'gold', 'gummy', 'galaxy'], 
-                rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%' },
-                bg: '#221931', row: 2, col: 3 
+                id: 'dream', name: 'Dream', rarity: 'legendary', obtain: 'Complete 3 daily dreamscape challenges or purchase from NPC Slumber.', 
+                variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], 
+                rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%', cube: '0%' },
+                bg: '#402011', row: 2, col: 1 
+            },
+            { 
+                id: 'punk', name: 'Punk', rarity: 'legendary', obtain: 'Unlocked at Level 50 of the Seasonal Pass or bought in the Item Shop.', 
+                variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], 
+                rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%', cube: '0%' },
+                bg: '#45200d', row: 2, col: 2 
             },
             { 
                 id: 'boss', name: 'Boss', rarity: 'legendary', obtain: 'Defeat any boss that are not Catwoman, Harley Quinn, or Poison Ivy', 
                 variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], 
                 rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%', cube: '0%' },
-                bg: '#412211', row: 2, col: 4 
-            },
-            { 
-                id: 'grim', name: 'Grim', rarity: 'mythic', obtain: 'Found in sprite chests, normal chests, and rare chests', 
-                variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], 
-                rates: { base: '0.09%', gold: '0%', gummy: '0%', galaxy: '0%', cube: '0%' },
-                bg: '#3d3413', row: 2, col: 5 
-            },
-            { 
-                id: 'air', name: 'Air', rarity: 'rare', obtain: 'Found in sprite chests, normal chests, and rare chests', 
-                variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], 
-                rates: { base: '0%', gold: '0.75%', gummy: '0.62%', galaxy: '0.5%', holofoil: '0.25%' },
-                bg: '#0e2b43', row: 3, col: 0 
+                bg: '#412211', row: 2, col: 3 
             },
             { 
                 id: 'seven', name: 'Seven', rarity: 'legendary', obtain: 'Found in sprite chests, normal chests, and rare chests', 
                 variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], 
                 rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%', holofoil: '0.05%' },
-                bg: '#3b2413', row: 3, col: 1 
+                bg: '#3b2413', row: 2, col: 4 
+            },
+
+            // ROW 3
+            { 
+                id: 'grim', name: 'Grim Reaper', rarity: 'mythic', obtain: 'Found in sprite chests, normal chests, and rare chests', 
+                variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], 
+                rates: { base: '0.09%', gold: '0%', gummy: '0%', galaxy: '0%', cube: '0%' },
+                bg: '#3d3413', row: 3, col: 0 
+            },
+            { 
+                id: 'zeropoint', name: 'Zero Point', rarity: 'mythic', obtain: 'Found in sprite chests, normal chests, and rare chests', 
+                variants: ['base', 'gold', 'gummy', 'galaxy'], 
+                rates: { base: '0.00093%', gold: '0.000041%', gummy: '0.000031%', galaxy: '0.000016%' },
+                bg: '#3a3212', row: 3, col: 1 
+            },
+            { 
+                id: 'burntpeanut', name: 'Burnt Peanut', rarity: 'mythic', obtain: 'Found in sprite chests, normal chests, and rare chests', 
+                variants: ['base'], 
+                rates: { base: '0%' },
+                bg: '#432e12', row: 3, col: 2 
+            },
+            { 
+                id: 'batman', name: 'Batman', rarity: 'mythic', obtain: 'Defeat Harley Quinn, Poison Ivy, or Catwoman', 
+                variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil', 'cube'], 
+                rates: { base: '2.23%', gold: '0.1%', gummy: '0.07%', galaxy: '0.04%', holofoil: '0.01%', cube: '0%' },
+                bg: '#3a3413', row: 3, col: 3 
             },
             { 
                 id: 'pollo', name: 'Pollo', rarity: 'mythic', obtain: 'Eliminating Pollo, the player, or from any chest in the game', 
                 variants: ['base'], 
                 rates: { base: '0%' },
-                bg: '#3a3413', row: 3, col: 2 
+                bg: '#3a3413', row: 3, col: 4 
+            },
+
+            // ROW 4
+            { 
+                id: 'vinijr', name: 'Vini Jr.', rarity: 'mythic', obtain: 'Found in sprite chests, normal chests, and rare chests', 
+                variants: ['base'], 
+                rates: { base: '0%' },
+                bg: '#423612', row: 4, col: 0 
             }
         ];
 
@@ -994,7 +1003,6 @@
         function saveOwnedVariants(spriteId, variants) {
             localStorage.setItem(`sprite_owned_${spriteId}`, JSON.stringify(variants));
             
-            // Check if all variants are owned to synchronize sprite completion
             const sprite = spritesData.find(s => s.id === spriteId);
             if (sprite) {
                 const isAllOwned = sprite.variants.length > 0 && variants.length === sprite.variants.length;
@@ -1158,8 +1166,9 @@
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
                     
-                    const cols = 6;
-                    const rows = 4;
+                    // Updated to match the 5x5 layout shown in the reference image
+                    const cols = 5;
+                    const rows = 5;
                     const cellW = img.width / cols;
                     const cellH = img.height / rows;
 
@@ -1170,7 +1179,15 @@
 
                     spritesData.forEach(sprite => {
                         ctx.clearRect(0, 0, cellW, cellH);
-                        ctx.drawImage(img, sprite.col * cellW, sprite.row * cellH, cellW, cellH, 0, 0, cellW, cellH);
+                        
+                        const padX = cellW * 0.035;
+                        const padY = cellH * 0.035;
+                        const srcX = (sprite.col * cellW) + padX;
+                        const srcY = (sprite.row * cellH) + padY;
+                        const srcW = cellW - (padX * 2);
+                        const srcH = cellH - (padY * 2);
+
+                        ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, cellW, cellH);
                         newSheet[sprite.id] = canvas.toDataURL('image/png');
                     });
 
