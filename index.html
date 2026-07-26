@@ -380,9 +380,9 @@
 
     <script>
         // CONFIGURATION: Set your password and JSONBin credentials here
-        const ADMIN_PASSWORD = "COOPEROPCOOLS";
-        const JSONBIN_ID = "6a665183f5f4af5e29c463bf";
-        const JSONBIN_KEY = "$2a$10$jOIt8vSgfNaQzBwTtZZBOuIam3PeIpoDIaY8eSMCXpsKLNtNK9yfK";
+        const ADMIN_PASSWORD = "YOUR_PASSWORD_HERE"; 
+        const JSONBIN_ID = "YOUR_BIN_ID_HERE";       // e.g., 660f...
+        const JSONBIN_KEY = "YOUR_MASTER_KEY_HERE";  // e.g., $2a$10$...
 
         let globalBaseSheet = {};
 
@@ -395,13 +395,8 @@
             galaxy: { label: 'Galaxy', className: 'galaxy' }
         };
 
-        function getVariantLabel(key) {
-            return variantMeta[key]?.label || key;
-        }
-
-        function getVariantClassKey(key) {
-            return variantMeta[key]?.className || key;
-        }
+        function getVariantLabel(key) { return variantMeta[key]?.label || key; }
+        function getVariantClassKey(key) { return variantMeta[key]?.className || key; }
 
         const spritesData = [
             // Row 1
@@ -433,28 +428,38 @@
 
         const totalTrackedVariants = spritesData.reduce((total, sprite) => total + sprite.variants.length, 0);
 
-        // FETCH SHARED SHEET FROM CLOUD
+        // FETCH SHARED SHEET (UPDATED & FIXED)
         async function fetchGlobalSheet() {
             if (!JSONBIN_ID || JSONBIN_ID.includes("YOUR_BIN_ID")) return;
             try {
                 const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest`, {
                     headers: { 'X-Master-Key': JSONBIN_KEY }
                 });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                
                 const data = await res.json();
-                if (data.record && typeof data.record === 'object') {
-                    globalBaseSheet = data.record;
+                
+                // Extracts internal data safely regardless of JSONBin wrapper format
+                const sheetData = data.record || data;
+                
+                if (sheetData && typeof sheetData === 'object' && Object.keys(sheetData).length > 0) {
+                    globalBaseSheet = sheetData;
                     renderGrid();
                 }
             } catch (err) {
-                console.error("Failed to load global sprite sheet:", err);
+                console.error("Fetch Error:", err);
             }
         }
 
         // SAVE SHARED SHEET TO CLOUD
         async function saveGlobalSheet() {
-            if (!JSONBIN_ID || JSONBIN_ID.includes("YOUR_BIN_ID")) return;
+            if (!JSONBIN_ID || JSONBIN_ID.includes("YOUR_BIN_ID")) {
+                alert("Error: Please enter your JSONBIN_ID and JSONBIN_KEY at the top of the script!");
+                return;
+            }
+
             try {
-                await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}`, {
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -462,9 +467,15 @@
                     },
                     body: JSON.stringify(globalBaseSheet)
                 });
-                alert("Base sheet successfully updated live for everyone!");
+
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    throw new Error(errData.message || `Server returned status ${res.status}`);
+                }
+
+                alert("Success! The sheet was updated live for everyone on the web.");
             } catch (err) {
-                alert("Failed to sync sheet to cloud.");
+                alert(`Failed to save: ${err.message}`);
             }
         }
 
@@ -487,21 +498,20 @@
                 img.onload = function() {
                     const cols = 6;
                     const rows = 4;
-
                     const cellW = img.width / cols;
                     const cellH = img.height / rows;
 
                     spritesData.forEach(sprite => {
                         const canvas = document.createElement('canvas');
-                        canvas.width = 160;
-                        canvas.height = 160;
+                        canvas.width = 120;
+                        canvas.height = 120;
                         const ctx = canvas.getContext('2d');
 
                         const sx = sprite.col * cellW;
                         const sy = sprite.row * cellH;
 
-                        ctx.drawImage(img, sx, sy, cellW, cellH, 0, 0, 160, 160);
-                        globalBaseSheet[sprite.id] = canvas.toDataURL('image/png');
+                        ctx.drawImage(img, sx, sy, cellW, cellH, 0, 0, 120, 120);
+                        globalBaseSheet[sprite.id] = canvas.toDataURL('image/jpeg', 0.85);
                     });
 
                     renderGrid();
@@ -516,20 +526,15 @@
             try {
                 const stored = JSON.parse(localStorage.getItem('fn_sprite_v1'));
                 if (!stored || typeof stored !== 'object') return {};
-
                 const normalized = {};
                 Object.entries(stored).forEach(([spriteId, ownedVariants]) => {
                     const sprite = spritesData.find(s => s.id === spriteId);
                     if (!sprite || !Array.isArray(ownedVariants)) return;
-
                     const valid = ownedVariants.filter(v => sprite.variants.includes(v));
                     if (valid.length) normalized[spriteId] = valid;
                 });
-
                 return normalized;
-            } catch (error) {
-                return {};
-            }
+            } catch { return {}; }
         }
 
         function saveProgress() {
@@ -537,22 +542,8 @@
         }
 
         function buildSpriteSvg(sprite) {
-            const initials = sprite.name
-                .split(/[\s-]+/)
-                .filter(Boolean)
-                .slice(0, 2)
-                .map(word => word[0])
-                .join('')
-                .toUpperCase() || 'SP';
-
-            const svg = `
-                <svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160">
-                    <rect width="160" height="160" rx="24" fill="${sprite.bg}" />
-                    <circle cx="80" cy="64" r="34" fill="rgba(255,255,255,0.16)" />
-                    <text x="80" y="73" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="28" font-weight="800" fill="#fff">${initials}</text>
-                </svg>
-            `;
-
+            const initials = sprite.name.split(/[\s-]+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || 'SP';
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160"><rect width="160" height="160" rx="24" fill="${sprite.bg}" /><circle cx="80" cy="64" r="34" fill="rgba(255,255,255,0.16)" /><text x="80" y="73" text-anchor="middle" font-family="sans-serif" font-size="28" font-weight="800" fill="#fff">${initials}</text></svg>`;
             return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
         }
 
@@ -563,20 +554,17 @@
             const searchVal = document.getElementById('search').value.toLowerCase();
             grid.innerHTML = '';
 
-            let totalOwned = 0;
-            let totalMax = 0;
+            let totalOwned = 0, totalMax = 0;
 
             spritesData.forEach(sprite => {
                 const owned = userProgress[sprite.id] || [];
                 const max = sprite.variants.length;
-
                 totalMax += max;
                 totalOwned += owned.length;
 
                 if (searchVal && !sprite.name.toLowerCase().includes(searchVal)) return;
 
                 const isCompleted = max > 0 && owned.length === max;
-
                 const card = document.createElement('div');
                 card.className = `card ${isCompleted ? 'completed' : ''}`;
                 card.onclick = () => openModal(sprite.id);
@@ -599,7 +587,6 @@
                     </div>
                     <div class="card-variants-bar">${dots}</div>
                 `;
-
                 grid.appendChild(card);
             });
 
@@ -611,7 +598,6 @@
         function openModal(id) {
             const sprite = spritesData.find(s => s.id === id);
             if (!sprite) return;
-
             document.getElementById('modal-title').innerText = sprite.name;
             const list = document.getElementById('variant-list');
             list.innerHTML = '';
@@ -620,40 +606,25 @@
             sprite.variants.forEach(v => {
                 const item = document.createElement('div');
                 item.className = `variant-item ${owned.includes(v) ? 'checked' : ''}`;
-                item.onclick = () => {
-                    toggleVariant(id, v);
-                    openModal(id);
-                };
-
+                item.onclick = () => { toggleVariant(id, v); openModal(id); };
                 item.innerHTML = `<span>${getVariantLabel(v)} Style</span><div class="checkbox"></div>`;
                 list.appendChild(item);
             });
-
             document.getElementById('modal-overlay').classList.add('active');
         }
 
         function toggleVariant(id, v) {
             if (!userProgress[id]) userProgress[id] = [];
-
             const idx = userProgress[id].indexOf(v);
-            if (idx > -1) {
-                userProgress[id].splice(idx, 1);
-            } else {
-                userProgress[id].push(v);
-            }
-
-            if (userProgress[id].length === 0) {
-                delete userProgress[id];
-            }
-
+            if (idx > -1) userProgress[id].splice(idx, 1);
+            else userProgress[id].push(v);
+            if (userProgress[id].length === 0) delete userProgress[id];
             saveProgress();
             renderGrid();
         }
 
         function closeModal(e) {
-            if (e.target.id === 'modal-overlay') {
-                document.getElementById('modal-overlay').classList.remove('active');
-            }
+            if (e.target.id === 'modal-overlay') document.getElementById('modal-overlay').classList.remove('active');
         }
 
         function resetAll() {
@@ -664,7 +635,6 @@
             }
         }
 
-        // Initialize and fetch global cloud sheet
         fetchGlobalSheet();
         renderGrid();
     </script>
