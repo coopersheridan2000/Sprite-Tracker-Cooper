@@ -17,8 +17,15 @@
             --v-gold: #facc15;
             --v-holofoil: #2dd4bf;
             --v-gummy: #f472b6;
-            --v-cube: #9333ea;
-            --v-galaxy: #6366f1;
+            --v-cube: #a855f7;
+            --v-galaxy: #818cf8;
+
+            /* RARITY COLORS */
+            --rarity-uncommon: #31b057;
+            --rarity-rare: #2b91ff;
+            --rarity-epic: #b24bf3;
+            --rarity-legendary: #ff9d00;
+            --rarity-mythic: #ff3355;
         }
 
         * {
@@ -38,6 +45,75 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+        }
+
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        #timer-alarm-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #dc2626;
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            text-align: center;
+            padding: 20px;
+            animation: pulseBg 1s infinite alternate ease-in-out;
+        }
+
+        #timer-alarm-overlay.active {
+            display: flex;
+        }
+
+        @keyframes pulseBg {
+            0% { background-color: #991b1b; }
+            100% { background-color: #ef4444; }
+        }
+
+        .alarm-title {
+            font-size: 3rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            text-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+
+        .alarm-sub {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        .btn-alarm-dismiss {
+            background: #ffffff;
+            color: #b91c1c;
+            font-size: 1.25rem;
+            font-weight: 800;
+            padding: 16px 36px;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            transition: transform 0.1s ease;
+        }
+
+        .btn-alarm-dismiss:active {
+            transform: scale(0.95);
         }
 
         header {
@@ -92,6 +168,32 @@
             transition: width 0.3s ease;
         }
 
+        .timer-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #0f1120;
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 8px 12px;
+            gap: 12px;
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .timer-display {
+            font-family: monospace, monospace;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #2dd4bf;
+            letter-spacing: 1px;
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 6px;
+        }
+
         .controls {
             display: flex;
             gap: 8px;
@@ -114,11 +216,26 @@
             background: #1a1d33;
             border: 1px solid var(--card-border);
             color: #fff;
-            padding: 10px 14px;
+            padding: 8px 12px;
             border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            transition: background 0.2s ease, opacity 0.2s ease;
+        }
+
+        .btn:active {
+            opacity: 0.8;
+        }
+
+        .btn-timer-start {
+            background: #10b981;
+            border-color: #059669;
+        }
+
+        .btn-timer-pause {
+            background: #f59e0b;
+            border-color: #d97706;
         }
 
         .btn-upload {
@@ -232,10 +349,17 @@
             bottom: 6px;
             left: 6px;
             font-size: 0.85rem;
-            font-weight: 800;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+            font-weight: 900;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
             z-index: 2;
         }
+
+        .rarity-uncommon { color: var(--rarity-uncommon); text-shadow: 0 0 6px rgba(49, 176, 87, 0.6), 0 2px 4px rgba(0,0,0,0.9); }
+        .rarity-rare { color: var(--rarity-rare); text-shadow: 0 0 6px rgba(43, 145, 255, 0.6), 0 2px 4px rgba(0,0,0,0.9); }
+        .rarity-epic { color: var(--rarity-epic); text-shadow: 0 0 6px rgba(178, 75, 243, 0.6), 0 2px 4px rgba(0,0,0,0.9); }
+        .rarity-legendary { color: var(--rarity-legendary); text-shadow: 0 0 6px rgba(255, 157, 0, 0.6), 0 2px 4px rgba(0,0,0,0.9); }
+        .rarity-mythic { color: var(--rarity-mythic); text-shadow: 0 0 8px rgba(255, 51, 85, 0.8), 0 2px 4px rgba(0,0,0,0.9); }
 
         .card-variants-bar {
             background: #0f1120;
@@ -281,9 +405,102 @@
         .modal {
             background: #141628;
             width: 90%;
-            max-width: 400px;
+            max-width: 440px;
+            max-height: 85vh;
+            overflow-y: auto;
             border-radius: 16px;
             padding: 20px;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.8);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .obtain-box {
+            background: #0f1120;
+            border: 1px solid var(--card-border);
+            border-left: 4px solid var(--accent-purple);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .obtain-box-title {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: var(--text-dim);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .obtain-box-text {
+            font-size: 0.9rem;
+            color: #e2e8f0;
+            line-height: 1.35;
+        }
+
+        .chances-box {
+            background: #0f1120;
+            border: 1px solid var(--card-border);
+            border-left: 4px solid #2dd4bf;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+
+        .chances-box-title {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: var(--text-dim);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .chances-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 6px;
+        }
+
+        .chance-item {
+            font-size: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .chance-label {
+            font-weight: 700;
+        }
+
+        .chance-val {
+            font-weight: 800;
+            color: #facc15;
+        }
+
+        .btn-select-all {
+            background: rgba(139, 92, 246, 0.2);
+            border: 1px solid var(--accent-purple);
+            color: #d8b4fe;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-select-all:active {
+            transform: scale(0.95);
         }
 
         .variant-item {
@@ -302,6 +519,19 @@
             border-color: var(--accent-purple);
             background: rgba(139, 92, 246, 0.1);
         }
+
+        .variant-label {
+            font-weight: 800;
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+        }
+
+        .variant-label.v-color-base { color: var(--v-base); text-shadow: 0 0 8px rgba(59, 130, 246, 0.4); }
+        .variant-label.v-color-gold { color: var(--v-gold); text-shadow: 0 0 8px rgba(250, 204, 21, 0.4); }
+        .variant-label.v-color-holofoil { color: var(--v-holofoil); text-shadow: 0 0 8px rgba(45, 212, 191, 0.4); }
+        .variant-label.v-color-gummy { color: var(--v-gummy); text-shadow: 0 0 8px rgba(244, 114, 182, 0.4); }
+        .variant-label.v-color-cube { color: var(--v-cube); text-shadow: 0 0 8px rgba(168, 85, 247, 0.4); }
+        .variant-label.v-color-galaxy { color: var(--v-galaxy); text-shadow: 0 0 8px rgba(129, 140, 248, 0.4); }
 
         .checkbox {
             width: 20px;
@@ -350,6 +580,14 @@
     </style>
 </head>
 <body>
+    <canvas id="confetti-canvas"></canvas>
+
+    <div id="timer-alarm-overlay">
+        <div class="alarm-title">⏰ TIME'S UP!</div>
+        <div class="alarm-sub">Your countdown has finished!</div>
+        <button class="btn-alarm-dismiss" onclick="dismissTimerAlarm()">DISMISS</button>
+    </div>
+
     <header>
         <h1>Sprite Tracker</h1>
         <div class="stats-bar">
@@ -360,6 +598,17 @@
             <div class="progress-outer">
                 <div class="progress-inner" id="progress-bar"></div>
             </div>
+
+            <div class="timer-container">
+                <span style="font-size: 0.8rem; font-weight: bold; color: var(--text-dim);" id="timer-label">TIMER</span>
+                <div class="timer-display" id="timer-display">02:00:00</div>
+                <div class="timer-controls">
+                    <button class="btn btn-timer-start" id="timer-start-btn" onclick="toggleTimer()">Start</button>
+                    <button class="btn" onclick="configureTimer()">Set Time</button>
+                    <button class="btn" onclick="resetTimer()">Reset</button>
+                </div>
+            </div>
+
             <div class="controls">
                 <input type="text" id="search" class="search-input" placeholder="Search..." oninput="renderGrid()">
                 <button class="btn btn-upload" onclick="triggerAdminUpload()">🔒 Admin Sheet</button>
@@ -373,62 +622,352 @@
 
     <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
         <div class="modal">
-            <h2 id="modal-title" style="margin-bottom: 15px;">Variants</h2>
+            <div class="modal-header">
+                <h2 id="modal-title">Variants</h2>
+                <button class="btn-select-all" id="modal-toggle-all-btn" onclick="toggleAllVariantsForCurrentSprite()">Select All</button>
+            </div>
+            <div class="obtain-box">
+                <div class="obtain-box-title">💡 How to Obtain</div>
+                <div class="obtain-box-text" id="modal-obtain-text">Loading instructions...</div>
+            </div>
+            <div class="chances-box">
+                <div class="chances-box-title">🎲 Variant Drop Rates</div>
+                <div class="chances-grid" id="modal-chances-grid"></div>
+            </div>
             <div id="variant-list"></div>
         </div>
     </div>
 
     <script>
-        // CONFIGURATION: Set your password and JSONBin credentials here
         const ADMIN_PASSWORD = "COOPEROPCOOLS"; 
         const JSONBIN_ID = "6a665183f5f4af5e29c463bf";       
         const JSONBIN_KEY = "$2a$10$jOIt8vSgfNaQzBwTtZZBOuIam3PeIpoDIaY8eSMCXpsKLNtNK9yfK";  
 
         let globalBaseSheet = {};
+        let activeModalSpriteId = null;
+        let hasFiredConfettiThisSession = false;
 
         const variantMeta = {
             base: { label: 'Base', className: 'base' },
-            holofoil: { label: 'Holofoil', className: 'holofoil' },
             gold: { label: 'Gold', className: 'gold' },
             gummy: { label: 'Gummy', className: 'gummy' },
-            cube: { label: 'Cube', className: 'cube' },
-            galaxy: { label: 'Galaxy', className: 'galaxy' }
+            galaxy: { label: 'Galaxy', className: 'galaxy' },
+            holofoil: { label: 'Holofoil', className: 'holofoil' },
+            cube: { label: 'Cube', className: 'cube' }
         };
 
         function getVariantLabel(key) { return variantMeta[key]?.label || key; }
         function getVariantClassKey(key) { return variantMeta[key]?.className || key; }
 
         const spritesData = [
-            { id: 'batman', name: 'Batman', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil', 'cube'], bg: '#3a3413', row: 0, col: 0 },
-            { id: 'water', name: 'Water', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], bg: '#0d324d', row: 0, col: 1 },
-            { id: 'earth', name: 'Earth', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], bg: '#172e21', row: 0, col: 2 },
-            { id: 'fire', name: 'Fire', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil', 'cube'], bg: '#3a2012', row: 0, col: 3 },
-            { id: 'duck', name: 'Duck', variants: ['base', 'gold', 'gummy', 'galaxy'], bg: '#33173d', row: 0, col: 4 },
-            { id: 'ghost', name: 'Ghost', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], bg: '#35183f', row: 0, col: 5 },
-            { id: 'dream', name: 'Dream', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], bg: '#402011', row: 1, col: 0 },
-            { id: 'demon', name: 'Demon', variants: ['base', 'gold', 'gummy', 'galaxy'], bg: '#2b1535', row: 1, col: 1 },
-            { id: 'punk', name: 'Punk', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], bg: '#45200d', row: 1, col: 2 },
-            { id: 'king', name: 'King', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], bg: '#1f1b31', row: 1, col: 3 },
-            { id: 'burntpeanut', name: 'Burnt Peanut', variants: ['base'], bg: '#432e12', row: 1, col: 4 },
-            { id: 'vinijr', name: 'Vini Jr.', variants: ['base'], bg: '#423612', row: 1, col: 5 },
-            { id: 'zeropoint', name: 'Zero Point', variants: ['base', 'gold', 'gummy', 'galaxy'], bg: '#3a3212', row: 2, col: 0 },
-            { id: 'fishy', name: 'Fishy', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], bg: '#0e2b40', row: 2, col: 1 },
-            { id: 'striker', name: 'Striker', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], bg: '#2d183d', row: 2, col: 2 },
-            { id: 'aura', name: 'Aura', variants: ['base', 'gold', 'gummy', 'galaxy'], bg: '#221931', row: 2, col: 3 },
-            { id: 'boss', name: 'Boss', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], bg: '#412211', row: 2, col: 4 },
-            { id: 'grim', name: 'Grim', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], bg: '#3d3413', row: 2, col: 5 },
-            { id: 'air', name: 'Air', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], bg: '#0e2b43', row: 3, col: 0 },
-            { id: 'seven', name: 'Seven', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], bg: '#3b2413', row: 3, col: 1 },
-            { id: 'pollo', name: 'Pollo', variants: ['base'], bg: '#3a3413', row: 3, col: 2 }
+            { 
+                id: 'batman', name: 'Batman', rarity: 'mythic', obtain: 'Defeat Harley Quinn, Poison Ivy, or Catwoman', 
+                variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil', 'cube'], 
+                rates: { base: '2.23%', gold: '0.1%', gummy: '0.07%', galaxy: '0.04%', holofoil: '0.01%', cube: '0%' },
+                bg: '#3a3413', row: 0, col: 0 
+            },
+            { 
+                id: 'water', name: 'Water', rarity: 'rare', obtain: 'Found in sprite chests, normal chests, and rare chests', 
+                variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], 
+                rates: { base: '0%', gold: '0.75%', gummy: '0.62%', galaxy: '0.5%', holofoil: '0.25%' },
+                bg: '#0d324d', row: 0, col: 1 
+            },
+            { 
+                id: 'earth', name: 'Earth', rarity: 'rare', obtain: 'Found in sprite chests, normal chests, and rare chests', 
+                variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], 
+                rates: { base: '0%', gold: '0.75%', gummy: '0.62%', galaxy: '0.5%', cube: '0%' },
+                bg: '#172e21', row: 0, col: 2 
+            },
+            { 
+                id: 'fire', name: 'Fire', rarity: 'rare', obtain: 'Found in sprite chests, normal chests, and rare chests', 
+                variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil', 'cube'], 
+                rates: { base: '0%', gold: '0.75%', gummy: '0.62%', galaxy: '0.5%', holofoil: '0.25%', cube: '0%' },
+                bg: '#3a2012', row: 0, col: 3 
+            },
+            { 
+                id: 'duck', name: 'Duck', rarity: 'epic', obtain: 'Found in sprite chests, normal chests, and rare chests', 
+                variants: ['base', 'gold', 'gummy', 'galaxy'], 
+                rates: { base: '9%', gold: '0.4%', gummy: '0.3%', galaxy: '0.16%' },
+                bg: '#33173d', row: 0, col: 4 
+            },
+            { 
+                id: 'ghost', name: 'Ghost', rarity: 'epic', obtain: 'Found in sprite chests, normal chests, and rare chests', 
+                variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], 
+                rates: { base: '9%', gold: '0.4%', gummy: '0.3%', galaxy: '0.16%', holofoil: '0.06%' },
+                bg: '#35183f', row: 0, col: 5 
+            },
+            { 
+                id: 'dream', name: 'Dream', rarity: 'legendary', obtain: 'Complete 3 daily dreamscape challenges or purchase from NPC Slumber.', 
+                variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], 
+                rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%', cube: '0%' },
+                bg: '#402011', row: 1, col: 0 
+            },
+            { 
+                id: 'demon', name: 'Demon', rarity: 'epic', obtain: 'Defeat demonic fiends during shadow wave events in infected zones.', 
+                variants: ['base', 'gold', 'gummy', 'galaxy'], 
+                rates: { base: '9%', gold: '0.4%', gummy: '0.3%', galaxy: '0.16%' },
+                bg: '#2b1535', row: 1, col: 1 
+            },
+            { 
+                id: 'punk', name: 'Punk', rarity: 'legendary', obtain: 'Unlocked at Level 50 of the Seasonal Pass or bought in the Item Shop.', 
+                variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], 
+                rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%', cube: '0%' },
+                bg: '#45200d', row: 1, col: 2 
+            },
+            { 
+                id: 'king', name: 'King', rarity: 'epic', obtain: 'Found in sprite chests, normal chests, and rare chests', 
+                variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], 
+                rates: { base: '9%', gold: '0.4%', gummy: '0.3%', galaxy: '0.16%', holofoil: '0.06%' },
+                bg: '#1f1b31', row: 1, col: 3 
+            },
+            { 
+                id: 'burntpeanut', name: 'Burnt Peanut', rarity: 'mythic', obtain: 'Found in sprite chests, normal chests, and rare chests', 
+                variants: ['base'], 
+                rates: { base: '0%' },
+                bg: '#432e12', row: 1, col: 4 
+            },
+            { 
+                id: 'vinijr', name: 'Vini Jr.', rarity: 'mythic', obtain: 'Found in sprite chests, normal chests, and rare chests', 
+                variants: ['base'], 
+                rates: { base: '0%' },
+                bg: '#423612', row: 1, col: 5 
+            },
+            { 
+                id: 'zeropoint', name: 'Zero Point', rarity: 'mythic', obtain: 'Found in sprite chests, normal chests, and rare chests', 
+                variants: ['base', 'gold', 'gummy', 'galaxy'], 
+                rates: { base: '0.00093%', gold: '0.000041%', gummy: '0.000031%', galaxy: '0.000016%' },
+                bg: '#3a3212', row: 2, col: 0 
+            },
+            { 
+                id: 'fishy', name: 'Fishy', rarity: 'rare', obtain: 'Found in sprite chests, normal chests, and rare chests', 
+                variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], 
+                rates: { base: '0%', gold: '0.75%', gummy: '0.62%', galaxy: '0.5%', cube: '0%' },
+                bg: '#0e2b40', row: 2, col: 1 
+            },
+            { 
+                id: 'striker', name: 'Striker', rarity: 'epic', obtain: 'Found in sprite chests, normal chests, rare chests, and from kicking a ball in the net at the soccer field', 
+                variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], 
+                rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%', holofoil: '0.05%' },
+                bg: '#2d183d', row: 2, col: 2 
+            },
+            { 
+                id: 'aura', name: 'Aura', rarity: 'epic', obtain: 'Found in sprite chests, normal chests, and rare chests', 
+                variants: ['base', 'gold', 'gummy', 'galaxy'], 
+                rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%' },
+                bg: '#221931', row: 2, col: 3 
+            },
+            { 
+                id: 'boss', name: 'Boss', rarity: 'legendary', obtain: 'Defeat any boss that are not Catwoman, Harley Quinn, or Poison Ivy', 
+                variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], 
+                rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%', cube: '0%' },
+                bg: '#412211', row: 2, col: 4 
+            },
+            { 
+                id: 'grim', name: 'Grim', rarity: 'mythic', obtain: 'Found in sprite chests, normal chests, and rare chests', 
+                variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], 
+                rates: { base: '0.09%', gold: '0%', gummy: '0%', galaxy: '0%', cube: '0%' },
+                bg: '#3d3413', row: 2, col: 5 
+            },
+            { 
+                id: 'air', name: 'Air', rarity: 'rare', obtain: 'Found in sprite chests, normal chests, and rare chests', 
+                variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], 
+                rates: { base: '0%', gold: '0.75%', gummy: '0.62%', galaxy: '0.5%', holofoil: '0.25%' },
+                bg: '#0e2b43', row: 3, col: 0 
+            },
+            { 
+                id: 'seven', name: 'Seven', rarity: 'legendary', obtain: 'Found in sprite chests, normal chests, and rare chests', 
+                variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], 
+                rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%', holofoil: '0.05%' },
+                bg: '#3b2413', row: 3, col: 1 
+            },
+            { 
+                id: 'pollo', name: 'Pollo', rarity: 'mythic', obtain: 'Eliminating Pollo, the player, or from any chest in the game', 
+                variants: ['base'], 
+                rates: { base: '0%' },
+                bg: '#3a3413', row: 3, col: 2 
+            }
         ];
 
         const totalTrackedVariants = spritesData.reduce((total, sprite) => total + sprite.variants.length, 0);
 
-        // FETCH SHARED SHEET (BYPASSES BROWSER CACHE)
+        function fireConfetti() {
+            const canvas = document.getElementById('confetti-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const particles = [];
+            const colors = ['#facc15', '#8b5cf6', '#2dd4bf', '#f472b6', '#3b82f6', '#10b981'];
+
+            for (let i = 0; i < 150; i++) {
+                particles.push({
+                    x: canvas.width / 2,
+                    y: canvas.height / 2,
+                    vx: (Math.random() - 0.5) * 22,
+                    vy: (Math.random() - 0.7) * 22,
+                    size: Math.random() * 8 + 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    rotation: Math.random() * 360,
+                    rotSpeed: (Math.random() - 0.5) * 10,
+                    opacity: 1
+                });
+            }
+
+            let animationFrame;
+            function render() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                let stillActive = false;
+
+                particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.4;
+                    p.rotation += p.rotSpeed;
+                    p.opacity -= 0.008;
+
+                    if (p.opacity > 0) {
+                        stillActive = true;
+                        ctx.save();
+                        ctx.globalAlpha = Math.max(0, p.opacity);
+                        ctx.translate(p.x, p.y);
+                        ctx.rotate((p.rotation * Math.PI) / 180);
+                        ctx.fillStyle = p.color;
+                        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                        ctx.restore();
+                    }
+                });
+
+                if (stillActive) {
+                    animationFrame = requestAnimationFrame(render);
+                } else {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    cancelAnimationFrame(animationFrame);
+                }
+            }
+            render();
+        }
+
+        let configuredDuration = parseInt(localStorage.getItem('fn_timer_config_duration'), 10) || (2 * 60 * 60);
+        let timerSeconds = configuredDuration;
+        let timerInterval = null;
+        let isTimerRunning = false;
+
+        function updateTimerDisplay() {
+            const h = Math.floor(timerSeconds / 3600);
+            const m = Math.floor((timerSeconds % 3600) / 60);
+            const s = timerSeconds % 60;
+
+            const formatted = [
+                String(h).padStart(2, '0'),
+                String(m).padStart(2, '0'),
+                String(s).padStart(2, '0')
+            ].join(':');
+
+            document.getElementById('timer-display').innerText = formatted;
+        }
+
+        function triggerTimerAlarm() {
+            document.getElementById('timer-alarm-overlay').classList.add('active');
+        }
+
+        function dismissTimerAlarm() {
+            document.getElementById('timer-alarm-overlay').classList.remove('active');
+            resetTimer();
+        }
+
+        function configureTimer() {
+            const input = prompt("Enter timer duration:\n- Format HH:MM:SS (e.g. 01:30:00)\n- Format MM:SS (e.g. 45:00)\n- Or total minutes (e.g. 120)");
+            if (input === null) return;
+
+            let totalSecs = 0;
+            const parts = input.trim().split(':');
+
+            if (parts.length === 3) {
+                totalSecs = (parseInt(parts[0], 10) * 3600) + (parseInt(parts[1], 10) * 60) + parseInt(parts[2], 10);
+            } else if (parts.length === 2) {
+                totalSecs = (parseInt(parts[0], 10) * 60) + parseInt(parts[1], 10);
+            } else if (parts.length === 1 && !isNaN(parts[0])) {
+                totalSecs = parseInt(parts[0], 10) * 60;
+            }
+
+            if (isNaN(totalSecs) || totalSecs <= 0) {
+                alert("Invalid duration entered!");
+                return;
+            }
+
+            configuredDuration = totalSecs;
+            localStorage.setItem('fn_timer_config_duration', configuredDuration);
+            resetTimer();
+        }
+
+        function toggleTimer() {
+            const btn = document.getElementById('timer-start-btn');
+            if (isTimerRunning) {
+                clearInterval(timerInterval);
+                isTimerRunning = false;
+                btn.innerText = "Start";
+                btn.className = "btn btn-timer-start";
+                localStorage.setItem('fn_timer_running', 'false');
+            } else {
+                if (timerSeconds <= 0) timerSeconds = configuredDuration;
+                isTimerRunning = true;
+                btn.innerText = "Pause";
+                btn.className = "btn btn-timer-pause";
+                
+                const targetTime = Date.now() + (timerSeconds * 1000);
+                localStorage.setItem('fn_timer_target', targetTime);
+                localStorage.setItem('fn_timer_running', 'true');
+
+                timerInterval = setInterval(() => {
+                    timerSeconds--;
+                    if (timerSeconds <= 0) {
+                        timerSeconds = 0;
+                        clearInterval(timerInterval);
+                        isTimerRunning = false;
+                        btn.innerText = "Start";
+                        btn.className = "btn btn-timer-start";
+                        localStorage.setItem('fn_timer_running', 'false');
+                        triggerTimerAlarm();
+                    }
+                    updateTimerDisplay();
+                }, 1000);
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            timerSeconds = configuredDuration;
+            const btn = document.getElementById('timer-start-btn');
+            btn.innerText = "Start";
+            btn.className = "btn btn-timer-start";
+            localStorage.removeItem('fn_timer_target');
+            localStorage.setItem('fn_timer_running', 'false');
+            updateTimerDisplay();
+        }
+
+        function initSavedTimer() {
+            const savedRunning = localStorage.getItem('fn_timer_running') === 'true';
+            const savedTarget = parseInt(localStorage.getItem('fn_timer_target'), 10);
+
+            if (savedRunning && savedTarget) {
+                const remaining = Math.round((savedTarget - Date.now()) / 1000);
+                if (remaining > 0) {
+                    timerSeconds = remaining;
+                    toggleTimer();
+                } else {
+                    timerSeconds = 0;
+                    updateTimerDisplay();
+                    triggerTimerAlarm();
+                }
+            } else {
+                updateTimerDisplay();
+            }
+        }
+
         async function fetchGlobalSheet() {
             if (!JSONBIN_ID || JSONBIN_ID.includes("YOUR_BIN_ID")) return;
             try {
-                // Time query prevents browser from retrieving cached versions
                 const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest?t=${Date.now()}`, {
                     headers: { 'X-Master-Key': JSONBIN_KEY },
                     cache: 'no-cache'
@@ -447,39 +986,163 @@
             }
         }
 
-        // SAVE SHARED SHEET TO CLOUD
-        async function saveGlobalSheet() {
-            if (!JSONBIN_ID || JSONBIN_ID.includes("YOUR_BIN_ID")) {
-                alert("Error: Enter your JSONBIN credentials at top of code.");
-                return;
+        function getOwnedVariants(spriteId) {
+            const saved = localStorage.getItem(`sprite_owned_${spriteId}`);
+            return saved ? JSON.parse(saved) : [];
+        }
+
+        function saveOwnedVariants(spriteId, variants) {
+            localStorage.setItem(`sprite_owned_${spriteId}`, JSON.stringify(variants));
+            
+            // Check if all variants are owned to synchronize sprite completion
+            const sprite = spritesData.find(s => s.id === spriteId);
+            if (sprite) {
+                const isAllOwned = sprite.variants.length > 0 && variants.length === sprite.variants.length;
+                localStorage.setItem(`sprite_completed_${spriteId}`, isAllOwned ? 'true' : 'false');
+            }
+        }
+
+        function openModal(spriteId) {
+            activeModalSpriteId = spriteId;
+            const sprite = spritesData.find(s => s.id === spriteId);
+            if (!sprite) return;
+
+            document.getElementById('modal-title').innerText = `${sprite.name} Variants`;
+            document.getElementById('modal-obtain-text').innerText = sprite.obtain || "No instructions specified.";
+
+            const chancesGrid = document.getElementById('modal-chances-grid');
+            chancesGrid.innerHTML = '';
+            sprite.variants.forEach(vKey => {
+                const item = document.createElement('div');
+                item.className = 'chance-item';
+                const rateVal = (sprite.rates && sprite.rates[vKey]) ? sprite.rates[vKey] : 'N/A';
+                item.innerHTML = `
+                    <span class="chance-label v-color-${getVariantClassKey(vKey)}">${getVariantLabel(vKey)}</span>
+                    <span class="chance-val">${rateVal}</span>
+                `;
+                chancesGrid.appendChild(item);
+            });
+
+            renderModalVariantList();
+            document.getElementById('modal-overlay').classList.add('active');
+        }
+
+        function renderModalVariantList() {
+            if (!activeModalSpriteId) return;
+            const sprite = spritesData.find(s => s.id === activeModalSpriteId);
+            const owned = getOwnedVariants(activeModalSpriteId);
+            const container = document.getElementById('variant-list');
+            container.innerHTML = '';
+
+            const toggleBtn = document.getElementById('modal-toggle-all-btn');
+            const allSelected = sprite.variants.every(v => owned.includes(v));
+            toggleBtn.innerText = allSelected ? "Deselect All" : "Select All";
+
+            sprite.variants.forEach(vKey => {
+                const isChecked = owned.includes(vKey);
+                const item = document.createElement('div');
+                item.className = `variant-item ${isChecked ? 'checked' : ''}`;
+                item.onclick = () => toggleVariant(activeModalSpriteId, vKey);
+
+                item.innerHTML = `
+                    <span class="variant-label v-color-${getVariantClassKey(vKey)}">${getVariantLabel(vKey)}</span>
+                    <div class="checkbox"></div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function toggleVariant(spriteId, variantKey) {
+            let owned = getOwnedVariants(spriteId);
+            if (owned.includes(variantKey)) {
+                owned = owned.filter(v => v !== variantKey);
+            } else {
+                owned.push(variantKey);
+            }
+            saveOwnedVariants(spriteId, owned);
+            renderModalVariantList();
+            renderGrid();
+        }
+
+        function toggleAllVariantsForCurrentSprite() {
+            if (!activeModalSpriteId) return;
+            const sprite = spritesData.find(s => s.id === activeModalSpriteId);
+            let owned = getOwnedVariants(activeModalSpriteId);
+
+            const allSelected = sprite.variants.every(v => owned.includes(v));
+            if (allSelected) {
+                owned = [];
+            } else {
+                owned = [...sprite.variants];
             }
 
-            try {
-                const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Master-Key': JSONBIN_KEY
-                    },
-                    body: JSON.stringify(globalBaseSheet)
-                });
+            saveOwnedVariants(activeModalSpriteId, owned);
+            renderModalVariantList();
+            renderGrid();
+        }
 
-                if (!res.ok) {
-                    const errData = await res.json().catch(() => ({}));
-                    throw new Error(errData.message || `HTTP ${res.status}`);
+        function closeModal(e) {
+            if (e.target.id === 'modal-overlay') {
+                document.getElementById('modal-overlay').classList.remove('active');
+                activeModalSpriteId = null;
+            }
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('sprite-grid');
+            const filter = document.getElementById('search').value.toLowerCase();
+            grid.innerHTML = '';
+
+            let totalOwned = 0;
+
+            spritesData.forEach(sprite => {
+                const owned = getOwnedVariants(sprite.id);
+                totalOwned += owned.length;
+
+                if (filter && !sprite.name.toLowerCase().includes(filter)) return;
+
+                const isComplete = sprite.variants.length > 0 && owned.length === sprite.variants.length;
+                const card = document.createElement('div');
+                card.className = `card ${isComplete ? 'completed' : ''}`;
+                card.onclick = () => openModal(sprite.id);
+
+                let imageStyle = '';
+                if (globalBaseSheet[sprite.id]) {
+                    imageStyle = `src="${globalBaseSheet[sprite.id]}"`;
                 }
 
-                alert("Saved to cloud! Everyone will now see this image.");
-            } catch (err) {
-                alert(`Upload failed: ${err.message}. Make sure your bin is set to Public or your Master Key is valid.`);
+                const dotsHtml = sprite.variants.map(v => {
+                    const activeClass = owned.includes(v) ? `active-${getVariantClassKey(v)}` : '';
+                    return `<div class="v-dot ${activeClass}"></div>`;
+                }).join('');
+
+                card.innerHTML = `
+                    <div class="card-preview" style="background:${sprite.bg || '#141628'}">
+                        <span class="badge">${owned.length}/${sprite.variants.length}</span>
+                        ${imageStyle ? `<img class="sprite-img" ${imageStyle} alt="${sprite.name}">` : ''}
+                        ${isComplete ? `<div class="owned-stamp">OWNED</div>` : ''}
+                        <div class="card-name rarity-${sprite.rarity}">${sprite.name}</div>
+                    </div>
+                    <div class="card-variants-bar">${dotsHtml}</div>
+                `;
+                grid.appendChild(card);
+            });
+
+            const percent = Math.round((totalOwned / totalTrackedVariants) * 100);
+            document.getElementById('progress-text').innerText = `${totalOwned} / ${totalTrackedVariants} (${percent}%)`;
+            document.getElementById('progress-bar').style.width = `${percent}%`;
+
+            if (percent === 100 && !hasFiredConfettiThisSession) {
+                fireConfetti();
+                hasFiredConfettiThisSession = true;
             }
         }
 
         function triggerAdminUpload() {
-            const pwd = prompt("Enter Admin Password to update sheet for everyone:");
-            if (pwd === ADMIN_PASSWORD) {
+            const pass = prompt("Enter Admin Password:");
+            if (pass === ADMIN_PASSWORD) {
                 document.getElementById('file-input').click();
-            } else if (pwd !== null) {
+            } else if (pass !== null) {
                 alert("Incorrect password!");
             }
         }
@@ -492,146 +1155,73 @@
             reader.onload = function(event) {
                 const img = new Image();
                 img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
                     const cols = 6;
                     const rows = 4;
                     const cellW = img.width / cols;
                     const cellH = img.height / rows;
 
+                    canvas.width = cellW;
+                    canvas.height = cellH;
+
+                    const newSheet = {};
+
                     spritesData.forEach(sprite => {
-                        const canvas = document.createElement('canvas');
-                        canvas.width = 96; // Optimized resolution for minimal payload size
-                        canvas.height = 96;
-                        const ctx = canvas.getContext('2d');
-
-                        const sx = sprite.col * cellW;
-                        const sy = sprite.row * cellH;
-
-                        ctx.drawImage(img, sx, sy, cellW, cellH, 0, 0, 96, 96);
-                        globalBaseSheet[sprite.id] = canvas.toDataURL('image/jpeg', 0.75); // High compression to guarantee fast cloud saves
+                        ctx.clearRect(0, 0, cellW, cellH);
+                        ctx.drawImage(img, sprite.col * cellW, sprite.row * cellH, cellW, cellH, 0, 0, cellW, cellH);
+                        newSheet[sprite.id] = canvas.toDataURL('image/png');
                     });
 
+                    globalBaseSheet = newSheet;
                     renderGrid();
-                    saveGlobalSheet();
+                    uploadToCloud(newSheet);
                 };
                 img.src = event.target.result;
             };
             reader.readAsDataURL(file);
         }
 
-        function loadProgress() {
+        async function uploadToCloud(sheetData) {
+            if (!JSONBIN_ID || JSONBIN_ID.includes("YOUR_BIN_ID")) {
+                alert("Sprite sheet processed locally! (Set up JSONBin credentials for sync).");
+                return;
+            }
+
             try {
-                const stored = JSON.parse(localStorage.getItem('fn_sprite_v1'));
-                if (!stored || typeof stored !== 'object') return {};
-                const normalized = {};
-                Object.entries(stored).forEach(([spriteId, ownedVariants]) => {
-                    const sprite = spritesData.find(s => s.id === spriteId);
-                    if (!sprite || !Array.isArray(ownedVariants)) return;
-                    const valid = ownedVariants.filter(v => sprite.variants.includes(v));
-                    if (valid.length) normalized[spriteId] = valid;
-                });
-                return normalized;
-            } catch { return {}; }
-        }
-
-        function saveProgress() {
-            localStorage.setItem('fn_sprite_v1', JSON.stringify(userProgress));
-        }
-
-        function buildSpriteSvg(sprite) {
-            const initials = sprite.name.split(/[\s-]+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || 'SP';
-            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160"><rect width="160" height="160" rx="24" fill="${sprite.bg}" /><circle cx="80" cy="64" r="34" fill="rgba(255,255,255,0.16)" /><text x="80" y="73" text-anchor="middle" font-family="sans-serif" font-size="28" font-weight="800" fill="#fff">${initials}</text></svg>`;
-            return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
-        }
-
-        let userProgress = loadProgress();
-
-        function renderGrid() {
-            const grid = document.getElementById('sprite-grid');
-            const searchVal = document.getElementById('search').value.toLowerCase();
-            grid.innerHTML = '';
-
-            let totalOwned = 0, totalMax = 0;
-
-            spritesData.forEach(sprite => {
-                const owned = userProgress[sprite.id] || [];
-                const max = sprite.variants.length;
-                totalMax += max;
-                totalOwned += owned.length;
-
-                if (searchVal && !sprite.name.toLowerCase().includes(searchVal)) return;
-
-                const isCompleted = max > 0 && owned.length === max;
-                const card = document.createElement('div');
-                card.className = `card ${isCompleted ? 'completed' : ''}`;
-                card.onclick = () => openModal(sprite.id);
-
-                let dots = '';
-                sprite.variants.forEach(v => {
-                    const activeClass = owned.includes(v) ? `active-${getVariantClassKey(v)}` : '';
-                    dots += `<div class="v-dot ${activeClass}"></div>`;
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': JSONBIN_KEY
+                    },
+                    body: JSON.stringify(sheetData)
                 });
 
-                const imgSrc = globalBaseSheet[sprite.id] || buildSpriteSvg(sprite);
-                const ownedStampHtml = isCompleted ? `<div class="owned-stamp">OWNED</div>` : '';
-
-                card.innerHTML = `
-                    <div class="card-preview" style="background: ${sprite.bg}">
-                        <div class="badge">${owned.length}/${max}</div>
-                        <img class="sprite-img" src="${imgSrc}" alt="${sprite.name}">
-                        ${ownedStampHtml}
-                        <div class="card-name">${sprite.name}</div>
-                    </div>
-                    <div class="card-variants-bar">${dots}</div>
-                `;
-                grid.appendChild(card);
-            });
-
-            const percent = totalMax > 0 ? Math.round((totalOwned / totalMax) * 100) : 0;
-            document.getElementById('progress-text').innerText = `${totalOwned} / ${totalTrackedVariants} (${percent}%)`;
-            document.getElementById('progress-bar').style.width = `${percent}%`;
-        }
-
-        function openModal(id) {
-            const sprite = spritesData.find(s => s.id === id);
-            if (!sprite) return;
-            document.getElementById('modal-title').innerText = sprite.name;
-            const list = document.getElementById('variant-list');
-            list.innerHTML = '';
-
-            const owned = userProgress[id] || [];
-            sprite.variants.forEach(v => {
-                const item = document.createElement('div');
-                item.className = `variant-item ${owned.includes(v) ? 'checked' : ''}`;
-                item.onclick = () => { toggleVariant(id, v); openModal(id); };
-                item.innerHTML = `<span>${getVariantLabel(v)} Style</span><div class="checkbox"></div>`;
-                list.appendChild(item);
-            });
-            document.getElementById('modal-overlay').classList.add('active');
-        }
-
-        function toggleVariant(id, v) {
-            if (!userProgress[id]) userProgress[id] = [];
-            const idx = userProgress[id].indexOf(v);
-            if (idx > -1) userProgress[id].splice(idx, 1);
-            else userProgress[id].push(v);
-            if (userProgress[id].length === 0) delete userProgress[id];
-            saveProgress();
-            renderGrid();
-        }
-
-        function closeModal(e) {
-            if (e.target.id === 'modal-overlay') document.getElementById('modal-overlay').classList.remove('active');
+                if (res.ok) {
+                    alert("Admin Sprite Sheet successfully saved and updated!");
+                } else {
+                    alert("Failed to upload to JSONBin cloud.");
+                }
+            } catch (err) {
+                console.error("Upload error:", err);
+                alert("Error connecting to cloud server.");
+            }
         }
 
         function resetAll() {
-            if (confirm('Reset your progress?')) {
-                userProgress = {};
-                localStorage.removeItem('fn_sprite_v1');
+            if (confirm("Are you sure you want to reset all collected progress?")) {
+                spritesData.forEach(s => {
+                    localStorage.removeItem(`sprite_owned_${s.id}`);
+                    localStorage.removeItem(`sprite_completed_${s.id}`);
+                });
+                hasFiredConfettiThisSession = false;
                 renderGrid();
             }
         }
 
-        // Initialize and load cloud sheet
+        initSavedTimer();
         fetchGlobalSheet();
         renderGrid();
     </script>
