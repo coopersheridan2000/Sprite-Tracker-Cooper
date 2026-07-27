@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Fortnite Sprite Tracker</title>
+    <title>Fortnite Sprite Tracker & Loadout Optimizer</title>
     <style>
         :root {
             --bg-color: #0b0c16;
@@ -246,6 +246,82 @@
         .btn-reset {
             color: #ff6b81;
             border-color: #611e2d;
+        }
+
+        /* LOADOUT OPTIMIZER PANEL */
+        .optimizer-panel {
+            width: 100%;
+            max-width: 1000px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+        }
+
+        .optimizer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .optimizer-title {
+            font-size: 1rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #facc15;
+        }
+
+        .optimizer-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .optimizer-select-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .optimizer-select-group label {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: var(--text-dim);
+            text-transform: uppercase;
+        }
+
+        .optimizer-select {
+            background: #0f1120;
+            border: 1px solid var(--card-border);
+            color: #fff;
+            padding: 8px 10px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        .optimizer-results {
+            background: #0f1120;
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 0.85rem;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .optimizer-results-title {
+            font-weight: 800;
+            color: #2dd4bf;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
         }
 
         .grid {
@@ -618,6 +694,23 @@
         </div>
     </header>
 
+    <!-- LOADOUT OPTIMIZER PANEL -->
+    <div class="optimizer-panel">
+        <div class="optimizer-header">
+            <div class="optimizer-title">⚡ Sprite Loadout Optimizer</div>
+        </div>
+        <div class="optimizer-grid">
+            <div class="optimizer-select-group">
+                <label for="opt-slot-1">Equipped Sprite</label>
+                <select id="opt-slot-1" class="optimizer-select" onchange="updateLoadoutOptimization()"></select>
+            </div>
+        </div>
+        <div class="optimizer-results">
+            <div class="optimizer-results-title">Exact Passive Buff & Loadout Summary</div>
+            <div id="optimizer-output">Select your equipped sprite above to view exact stat breakdowns and playstyle recommendations.</div>
+        </div>
+    </div>
+
     <div class="grid" id="sprite-grid"></div>
 
     <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
@@ -640,8 +733,6 @@
 
     <script>
         const ADMIN_PASSWORD = "COOPEROPCOOLS"; 
-        const JSONBIN_ID = "6a665183f5f4af5e29c463bf";       
-        const JSONBIN_KEY = "$2a$10$jOIt8vSgfNaQzBwTtZZBOuIam3PeIpoDIaY8eSMCXpsKLNtNK9yfK";  
 
         let globalBaseSheet = {};
         let activeModalSpriteId = null;
@@ -895,18 +986,18 @@
                 totalSecs = (parseInt(parts[0], 10) * 3600) + (parseInt(parts[1], 10) * 60) + parseInt(parts[2], 10);
             } else if (parts.length === 2) {
                 totalSecs = (parseInt(parts[0], 10) * 60) + parseInt(parts[1], 10);
-            } else if (parts.length === 1 && !isNaN(parts[0])) {
+            } else {
                 totalSecs = parseInt(parts[0], 10) * 60;
             }
 
-            if (isNaN(totalSecs) || totalSecs <= 0) {
-                alert("Invalid duration entered!");
-                return;
+            if (!isNaN(totalSecs) && totalSecs > 0) {
+                configuredDuration = totalSecs;
+                localStorage.setItem('fn_timer_config_duration', configuredDuration);
+                timerSeconds = configuredDuration;
+                updateTimerDisplay();
+            } else {
+                alert("Invalid format entered.");
             }
-
-            configuredDuration = totalSecs;
-            localStorage.setItem('fn_timer_config_duration', configuredDuration);
-            resetTimer();
         }
 
         function toggleTimer() {
@@ -914,31 +1005,29 @@
             if (isTimerRunning) {
                 clearInterval(timerInterval);
                 isTimerRunning = false;
-                btn.innerText = "Start";
-                btn.className = "btn btn-timer-start";
-                localStorage.setItem('fn_timer_running', 'false');
+                btn.innerText = 'Start';
+                btn.classList.remove('btn-timer-pause');
+                btn.classList.add('btn-timer-start');
             } else {
                 if (timerSeconds <= 0) timerSeconds = configuredDuration;
                 isTimerRunning = true;
-                btn.innerText = "Pause";
-                btn.className = "btn btn-timer-pause";
-                
-                const targetTime = Date.now() + (timerSeconds * 1000);
-                localStorage.setItem('fn_timer_target', targetTime);
-                localStorage.setItem('fn_timer_running', 'true');
+                btn.innerText = 'Pause';
+                btn.classList.remove('btn-timer-start');
+                btn.classList.add('btn-timer-pause');
 
                 timerInterval = setInterval(() => {
-                    timerSeconds--;
-                    if (timerSeconds <= 0) {
-                        timerSeconds = 0;
-                        clearInterval(timerInterval);
-                        isTimerRunning = false;
-                        btn.innerText = "Start";
-                        btn.className = "btn btn-timer-start";
-                        localStorage.setItem('fn_timer_running', 'false');
-                        triggerTimerAlarm();
+                    if (timerSeconds > 0) {
+                        timerSeconds--;
+                        updateTimerDisplay();
+                        if (timerSeconds === 0) {
+                            clearInterval(timerInterval);
+                            isTimerRunning = false;
+                            btn.innerText = 'Start';
+                            btn.classList.remove('btn-timer-pause');
+                            btn.classList.add('btn-timer-start');
+                            triggerTimerAlarm();
+                        }
                     }
-                    updateTimerDisplay();
                 }, 1000);
             }
         }
@@ -947,66 +1036,200 @@
             clearInterval(timerInterval);
             isTimerRunning = false;
             timerSeconds = configuredDuration;
-            const btn = document.getElementById('timer-start-btn');
-            btn.innerText = "Start";
-            btn.className = "btn btn-timer-start";
-            localStorage.removeItem('fn_timer_target');
-            localStorage.setItem('fn_timer_running', 'false');
             updateTimerDisplay();
+            const btn = document.getElementById('timer-start-btn');
+            btn.innerText = 'Start';
+            btn.classList.remove('btn-timer-pause');
+            btn.classList.add('btn-timer-start');
         }
 
-        function initSavedTimer() {
-            const savedRunning = localStorage.getItem('fn_timer_running') === 'true';
-            const savedTarget = parseInt(localStorage.getItem('fn_timer_target'), 10);
-
-            if (savedRunning && savedTarget) {
-                const remaining = Math.round((savedTarget - Date.now()) / 1000);
-                if (remaining > 0) {
-                    timerSeconds = remaining;
-                    toggleTimer();
-                } else {
-                    timerSeconds = 0;
-                    updateTimerDisplay();
-                    triggerTimerAlarm();
-                }
-            } else {
-                updateTimerDisplay();
-            }
-        }
-
-        async function fetchGlobalSheet() {
-            if (!JSONBIN_ID || JSONBIN_ID.includes("YOUR_BIN_ID")) return;
+        function getSavedProgress() {
             try {
-                const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest?t=${Date.now()}`, {
-                    headers: { 'X-Master-Key': JSONBIN_KEY },
-                    cache: 'no-cache'
-                });
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                
-                const data = await res.json();
-                const sheetData = data.record || data;
-                
-                if (sheetData && typeof sheetData === 'object' && Object.keys(sheetData).length > 0) {
-                    globalBaseSheet = sheetData;
-                    renderGrid();
-                }
-            } catch (err) {
-                console.error("Fetch Error:", err);
+                return JSON.parse(localStorage.getItem('fn_sprite_tracker_progress')) || {};
+            } catch {
+                return {};
             }
         }
 
-        function getOwnedVariants(spriteId) {
-            const saved = localStorage.getItem(`sprite_owned_${spriteId}`);
-            return saved ? JSON.parse(saved) : [];
+        function saveProgress(data) {
+            localStorage.setItem('fn_sprite_tracker_progress', JSON.stringify(data));
         }
 
-        function saveOwnedVariants(spriteId, variants) {
-            localStorage.setItem(`sprite_owned_${spriteId}`, JSON.stringify(variants));
-            
-            const sprite = spritesData.find(s => s.id === spriteId);
-            if (sprite) {
-                const isAllOwned = sprite.variants.length > 0 && variants.length === sprite.variants.length;
-                localStorage.setItem(`sprite_completed_${spriteId}`, isAllOwned ? 'true' : 'false');
+        function initOptimizerDropdowns() {
+            const select = document.getElementById('opt-slot-1');
+            select.innerHTML = '<option value="">-- None --</option>';
+            spritesData.forEach(sprite => {
+                const opt = document.createElement('option');
+                opt.value = sprite.id;
+                opt.innerText = `${sprite.name} (${sprite.rarity.toUpperCase()})`;
+                select.appendChild(opt);
+            });
+            updateLoadoutOptimization();
+        }
+
+        function updateLoadoutOptimization() {
+            const s1 = document.getElementById('opt-slot-1').value;
+            const output = document.getElementById('optimizer-output');
+
+            if (!s1) {
+                output.innerHTML = "Select your equipped sprite above to view exact stat breakdowns and playstyle recommendations.";
+                return;
+            }
+
+            let buffText = "";
+
+            switch(s1) {
+                case 'water':
+                    buffText = "💧 **Water Sprite**: Replenishes shields while you stand in water.";
+                    break;
+                case 'earth':
+                    buffText = "🌍 **Earth Sprite**: Gives a chance for extra rare items from chests.";
+                    break;
+                case 'fire':
+                    buffText = "🔥 **Fire Sprite**: Releases a fiery burst after you deal enough damage.";
+                    break;
+                case 'fishy':
+                    buffText = "🐟 **Fishy Sprite**: Increases swim speed and gives a movement boost while taking fire.";
+                    break;
+                case 'air':
+                    buffText = "💨 **Air Sprite**: Increases sprinting speed and jump height.";
+                    break;
+                case 'duck':
+                    buffText = "🦆 **Duck Sprite**: Emoting and jamming replenishes your shields.";
+                    break;
+                case 'ghost':
+                    buffText = "👻 **Ghost Sprite**: Cloaks you for a short time after reloading.";
+                    break;
+                case 'demon':
+                    buffText = "😈 **Demon Sprite**: Siphons health and shields on eliminations.";
+                    break;
+                case 'king':
+                    buffText = "👑 **King Sprite**: Boosts pickaxe damage.";
+                    break;
+                case 'aura':
+                    buffText = "✨ **Aura Sprite**: Grants a Shock Rock charge after enough damage dealt.";
+                    break;
+                case 'striker':
+                    buffText = "⚽ **Striker Sprite**: Triggers Overdrive after mantling or hurdling.";
+                    break;
+                case 'dream':
+                    buffText = "🌙 **Dream Sprite**: Grants a random item each level, with stronger loot at max level.";
+                    break;
+                case 'punk':
+                    buffText = "🎸 **Punk Sprite**: Can trigger infinite ammo effects.";
+                    break;
+                case 'boss':
+                    buffText = "⭐ **Boss Sprite**: Boosts your maximum Health and Shield.";
+                    break;
+                case 'seven':
+                    buffText = "🛸 **Seven Sprite**: Reveals enemy foot trails to your whole squad.";
+                    break;
+                case 'grim':
+                    buffText = "🌌 **Grim Reaper Sprite**: Marks players who damage you.";
+                    break;
+                case 'zeropoint':
+                    buffText = "🌌 **Zero Point Sprite**: Spawns a Shield Bubble Jr. when you heal yourself.";
+                    break;
+                case 'burntpeanut':
+                    buffText = "⭐ **Burnt Peanut Sprite**: Can drop extra or mythic loot on eliminations.";
+                    break;
+                case 'batman':
+                    buffText = "🦇 **Batman Sprite**: Ability being confirmed in-game — not officially revealed yet.";
+                    break;
+                case 'pollo':
+                    buffText = "🍗 **Pollo Sprite**: Eliminations slowly restore Shield for you and nearby teammates for a duration.";
+                    break;
+                case 'vinijr':
+                    buffText = "⚽ **Vini Jr. Sprite**: Sprinting charges a destructive slide; slidekicking enemies boosts fire rate and reload speed.";
+                    break;
+                default:
+                    buffText = "No active buff data found.";
+            }
+
+            output.innerHTML = `
+                <div style="margin-bottom: 4px;"><strong>Equipped Active Buff:</strong></div>
+                <div>${buffText}</div>
+            `;
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('sprite-grid');
+            const search = document.getElementById('search').value.toLowerCase();
+            const progress = getSavedProgress();
+
+            grid.innerHTML = '';
+
+            let collectedCount = 0;
+            let totalCheckedVariantsCount = 0;
+
+            spritesData.forEach(sprite => {
+                if (search && !sprite.name.toLowerCase().includes(search) && !sprite.rarity.includes(search)) {
+                    return;
+                }
+
+                const spriteProgress = progress[sprite.id] || {};
+                const ownedVariants = sprite.variants.filter(v => spriteProgress[v]);
+                const isComplete = ownedVariants.length === sprite.variants.length;
+
+                if (isComplete) collectedCount++;
+                totalCheckedVariantsCount += ownedVariants.length;
+
+                const card = document.createElement('div');
+                card.className = `card ${isComplete ? 'completed' : ''}`;
+                card.onclick = () => openModal(sprite.id);
+
+                const preview = document.createElement('div');
+                preview.className = 'card-preview';
+                preview.style.background = `radial-gradient(circle, ${sprite.bg} 0%, #101222 100%)`;
+
+                if (isComplete) {
+                    const stamp = document.createElement('div');
+                    stamp.className = 'owned-stamp';
+                    stamp.innerText = 'OWNED';
+                    preview.appendChild(stamp);
+                }
+
+                const badge = document.createElement('div');
+                badge.className = `badge rarity-${sprite.rarity}`;
+                badge.innerText = sprite.rarity.toUpperCase();
+                preview.appendChild(badge);
+
+                const nameDiv = document.createElement('div');
+                nameDiv.className = `card-name rarity-${sprite.rarity}`;
+                nameDiv.innerText = sprite.name;
+                preview.appendChild(nameDiv);
+
+                const img = document.createElement('img');
+                img.className = 'sprite-img';
+                const baseSheet = globalBaseSheet[sprite.id];
+                if (baseSheet) {
+                    img.src = baseSheet;
+                } else {
+                    img.src = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23ffffff" font-size="12">${sprite.name}</text></svg>`;
+                }
+                preview.appendChild(img);
+                card.appendChild(preview);
+
+                const variantsBar = document.createElement('div');
+                variantsBar.className = 'card-variants-bar';
+                sprite.variants.forEach(vKey => {
+                    const dot = document.createElement('div');
+                    const isActive = !!spriteProgress[vKey];
+                    dot.className = `v-dot ${isActive ? 'active-' + getVariantClassKey(vKey) : ''}`;
+                    variantsBar.appendChild(dot);
+                });
+                card.appendChild(variantsBar);
+
+                grid.appendChild(card);
+            });
+
+            const pct = Math.round((totalCheckedVariantsCount / totalTrackedVariants) * 100) || 0;
+            document.getElementById('progress-text').innerText = `${totalCheckedVariantsCount} / ${totalTrackedVariants} Variants (${pct}%)`;
+            document.getElementById('progress-bar').style.width = `${pct}%`;
+
+            if (pct === 100 && !hasFiredConfettiThisSession) {
+                hasFiredConfettiThisSession = true;
+                fireConfetti();
             }
         }
 
@@ -1016,235 +1239,150 @@
             if (!sprite) return;
 
             document.getElementById('modal-title').innerText = `${sprite.name} Variants`;
-            document.getElementById('modal-obtain-text').innerText = sprite.obtain || "No instructions specified.";
+            document.getElementById('modal-obtain-text').innerText = sprite.obtain;
 
             const chancesGrid = document.getElementById('modal-chances-grid');
             chancesGrid.innerHTML = '';
             sprite.variants.forEach(vKey => {
+                const rate = sprite.rates[vKey] || '0%';
                 const item = document.createElement('div');
                 item.className = 'chance-item';
-                const rateVal = (sprite.rates && sprite.rates[vKey]) ? sprite.rates[vKey] : 'N/A';
-                item.innerHTML = `
-                    <span class="chance-label v-color-${getVariantClassKey(vKey)}">${getVariantLabel(vKey)}</span>
-                    <span class="chance-val">${rateVal}</span>
-                `;
+                item.innerHTML = `<span class="chance-label">${getVariantLabel(vKey)}</span><span class="chance-val">${rate}</span>`;
                 chancesGrid.appendChild(item);
             });
 
-            renderModalVariantList();
+            renderVariantList();
             document.getElementById('modal-overlay').classList.add('active');
         }
 
-        function renderModalVariantList() {
-            if (!activeModalSpriteId) return;
+        function renderVariantList() {
             const sprite = spritesData.find(s => s.id === activeModalSpriteId);
-            const owned = getOwnedVariants(activeModalSpriteId);
-            const container = document.getElementById('variant-list');
-            container.innerHTML = '';
+            if (!sprite) return;
 
+            const progress = getSavedProgress();
+            const spriteProgress = progress[sprite.id] || {};
+            const listContainer = document.getElementById('variant-list');
+            listContainer.innerHTML = '';
+
+            const allChecked = sprite.variants.every(v => spriteProgress[v]);
             const toggleBtn = document.getElementById('modal-toggle-all-btn');
-            const allSelected = sprite.variants.every(v => owned.includes(v));
-            toggleBtn.innerText = allSelected ? "Deselect All" : "Select All";
+            toggleBtn.innerText = allChecked ? 'Deselect All' : 'Select All';
 
             sprite.variants.forEach(vKey => {
-                const isChecked = owned.includes(vKey);
+                const isChecked = !!spriteProgress[vKey];
                 const item = document.createElement('div');
                 item.className = `variant-item ${isChecked ? 'checked' : ''}`;
-                item.onclick = () => toggleVariant(activeModalSpriteId, vKey);
+                item.onclick = () => toggleVariant(sprite.id, vKey);
 
-                item.innerHTML = `
-                    <span class="variant-label v-color-${getVariantClassKey(vKey)}">${getVariantLabel(vKey)}</span>
-                    <div class="checkbox"></div>
-                `;
-                container.appendChild(item);
+                const label = document.createElement('div');
+                label.className = `variant-label v-color-${getVariantClassKey(vKey)}`;
+                label.innerText = getVariantLabel(vKey);
+
+                const checkbox = document.createElement('div');
+                checkbox.className = 'checkbox';
+
+                item.appendChild(label);
+                item.appendChild(checkbox);
+                listContainer.appendChild(item);
             });
         }
 
-        function toggleVariant(spriteId, variantKey) {
-            let owned = getOwnedVariants(spriteId);
-            if (owned.includes(variantKey)) {
-                owned = owned.filter(v => v !== variantKey);
-            } else {
-                owned.push(variantKey);
-            }
-            saveOwnedVariants(spriteId, owned);
-            renderModalVariantList();
+        function toggleVariant(spriteId, vKey) {
+            const progress = getSavedProgress();
+            if (!progress[spriteId]) progress[spriteId] = {};
+            progress[spriteId][vKey] = !progress[spriteId][vKey];
+            saveProgress(progress);
+            renderVariantList();
             renderGrid();
         }
 
         function toggleAllVariantsForCurrentSprite() {
-            if (!activeModalSpriteId) return;
             const sprite = spritesData.find(s => s.id === activeModalSpriteId);
-            let owned = getOwnedVariants(activeModalSpriteId);
+            if (!sprite) return;
 
-            const allSelected = sprite.variants.every(v => owned.includes(v));
-            if (allSelected) {
-                owned = [];
-            } else {
-                owned = [...sprite.variants];
-            }
+            const progress = getSavedProgress();
+            if (!progress[sprite.id]) progress[sprite.id] = {};
 
-            saveOwnedVariants(activeModalSpriteId, owned);
-            renderModalVariantList();
+            const allChecked = sprite.variants.every(v => progress[sprite.id][v]);
+            sprite.variants.forEach(v => {
+                progress[sprite.id][v] = !allChecked;
+            });
+
+            saveProgress(progress);
+            renderVariantList();
             renderGrid();
         }
 
         function closeModal(e) {
             if (e.target.id === 'modal-overlay') {
                 document.getElementById('modal-overlay').classList.remove('active');
-                activeModalSpriteId = null;
-            }
-        }
-
-        function renderGrid() {
-            const grid = document.getElementById('sprite-grid');
-            const filter = document.getElementById('search').value.toLowerCase();
-            grid.innerHTML = '';
-
-            let totalOwned = 0;
-
-            spritesData.forEach(sprite => {
-                const owned = getOwnedVariants(sprite.id);
-                totalOwned += owned.length;
-
-                if (filter && !sprite.name.toLowerCase().includes(filter)) return;
-
-                const isComplete = sprite.variants.length > 0 && owned.length === sprite.variants.length;
-                const card = document.createElement('div');
-                card.className = `card ${isComplete ? 'completed' : ''}`;
-                card.onclick = () => openModal(sprite.id);
-
-                let imageStyle = '';
-                if (globalBaseSheet[sprite.id]) {
-                    imageStyle = `src="${globalBaseSheet[sprite.id]}"`;
-                }
-
-                const dotsHtml = sprite.variants.map(v => {
-                    const activeClass = owned.includes(v) ? `active-${getVariantClassKey(v)}` : '';
-                    return `<div class="v-dot ${activeClass}"></div>`;
-                }).join('');
-
-                card.innerHTML = `
-                    <div class="card-preview" style="background:${sprite.bg || '#141628'}">
-                        <span class="badge">${owned.length}/${sprite.variants.length}</span>
-                        ${imageStyle ? `<img class="sprite-img" ${imageStyle} alt="${sprite.name}">` : ''}
-                        ${isComplete ? `<div class="owned-stamp">OWNED</div>` : ''}
-                        <div class="card-name rarity-${sprite.rarity}">${sprite.name}</div>
-                    </div>
-                    <div class="card-variants-bar">${dotsHtml}</div>
-                `;
-                grid.appendChild(card);
-            });
-
-            const percent = Math.round((totalOwned / totalTrackedVariants) * 100);
-            document.getElementById('progress-text').innerText = `${totalOwned} / ${totalTrackedVariants} (${percent}%)`;
-            document.getElementById('progress-bar').style.width = `${percent}%`;
-
-            if (percent === 100 && !hasFiredConfettiThisSession) {
-                fireConfetti();
-                hasFiredConfettiThisSession = true;
-            }
-        }
-
-        function triggerAdminUpload() {
-            const pass = prompt("Enter Admin Password:");
-            if (pass === ADMIN_PASSWORD) {
-                document.getElementById('file-input').click();
-            } else if (pass !== null) {
-                alert("Incorrect password!");
-            }
-        }
-
-        function processSpriteSheet(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                const img = new Image();
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    
-                    const cols = 5;
-                    const rows = 5;
-                    const cellW = img.width / cols;
-                    const cellH = img.height / rows;
-
-                    // Compress slice resolution to keep JSONBin payload sizes well within API limits
-                    const targetSize = 96;
-                    canvas.width = targetSize;
-                    canvas.height = targetSize;
-
-                    const newSheet = {};
-
-                    spritesData.forEach(sprite => {
-                        ctx.clearRect(0, 0, targetSize, targetSize);
-                        
-                        const padX = cellW * 0.035;
-                        const padY = cellH * 0.035;
-                        const srcX = (sprite.col * cellW) + padX;
-                        const srcY = (sprite.row * cellH) + padY;
-                        const srcW = cellW - (padX * 2);
-                        const srcH = cellH - (padY * 2);
-
-                        ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, targetSize, targetSize);
-                        // Use webp/jpeg compression dataURL to prevent oversized payloads
-                        newSheet[sprite.id] = canvas.toDataURL('image/webp', 0.85);
-                    });
-
-                    globalBaseSheet = newSheet;
-                    renderGrid();
-                    uploadToCloud(newSheet);
-                };
-                img.src = event.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-
-        async function uploadToCloud(sheetData) {
-            if (!JSONBIN_ID || JSONBIN_ID.includes("YOUR_BIN_ID")) {
-                alert("Sprite sheet processed locally! (Set up JSONBin credentials for sync).");
-                return;
-            }
-
-            try {
-                const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Master-Key': JSONBIN_KEY
-                    },
-                    body: JSON.stringify(sheetData)
-                });
-
-                if (res.ok) {
-                    alert("Admin Sprite Sheet successfully saved and updated to the cloud!");
-                } else {
-                    const errRes = await res.json().catch(() => ({}));
-                    console.error("Cloud Error Response:", errRes);
-                    alert(`Failed to upload to JSONBin cloud (Status ${res.status}). Check console for details.`);
-                }
-            } catch (err) {
-                console.error("Upload network error:", err);
-                alert("Network error connecting to cloud server. Check your connection or CORS settings.");
             }
         }
 
         function resetAll() {
-            if (confirm("Are you sure you want to reset all collected progress?")) {
-                spritesData.forEach(s => {
-                    localStorage.removeItem(`sprite_owned_${s.id}`);
-                    localStorage.removeItem(`sprite_completed_${s.id}`);
-                });
+            if (confirm("Are you sure you want to reset all tracked progress?")) {
+                localStorage.removeItem('fn_sprite_tracker_progress');
                 hasFiredConfettiThisSession = false;
                 renderGrid();
             }
         }
 
-        initSavedTimer();
-        fetchGlobalSheet();
-        renderGrid();
+        function triggerAdminUpload() {
+            const pwd = prompt("Enter Admin Password:");
+            if (pwd === ADMIN_PASSWORD) {
+                document.getElementById('file-input').click();
+            } else if (pwd !== null) {
+                alert("Incorrect Password.");
+            }
+        }
+
+        function processSpriteSheet(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+
+                    const cols = 5;
+                    const rows = 5;
+                    const cellW = img.width / cols;
+                    const cellH = img.height / rows;
+
+                    spritesData.forEach(sprite => {
+                        const subCanvas = document.createElement('canvas');
+                        subCanvas.width = cellW;
+                        subCanvas.height = cellH;
+                        const subCtx = subCanvas.getContext('2d');
+
+                        subCtx.drawImage(
+                            img,
+                            sprite.col * cellW, sprite.row * cellH, cellW, cellH,
+                            0, 0, cellW, cellH
+                        );
+
+                        globalBaseSheet[sprite.id] = subCanvas.toDataURL();
+                    });
+
+                    renderGrid();
+                    alert("Sprite sheet sliced and loaded successfully!");
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        window.onload = function() {
+            initOptimizerDropdowns();
+            renderGrid();
+            updateTimerDisplay();
+        };
     </script>
 </body>
 </html>
