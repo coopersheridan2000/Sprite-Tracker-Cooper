@@ -804,7 +804,10 @@
         // State Management
         let collectedData = JSON.parse(localStorage.getItem('spriteData')) || {};
         let masteryData = JSON.parse(localStorage.getItem('spriteVariantMastery')) || {};
-        let customSheetImage = localStorage.getItem('customSpriteSheet') || 'image_daec01.png';
+
+         // Default image until the online one loads
+        let customSheetImage = "image_daec01.png";
+
         let activeModalSpriteId = null;
         let hasFiredConfettiThisSession = false;
 
@@ -948,12 +951,60 @@
                 bg: '#252233', row: 4, col: 0 
             }
         ];
+        
+        async function loadLatestSpriteSheet() {
+
+    try {
+
+        const response = await fetch(
+            `https://api.jsonbin.io/v3/b/${BIN_ID}/latest`,
+            {
+                headers: {
+                    "X-Master-Key": API_KEY
+                }
+            }
+        );
+
+        const data = await response.json();
+
+        if (data.record && data.record.spriteSheet) {
+
+            customSheetImage = data.record.spriteSheet;
+
+            localStorage.setItem(
+                "customSpriteSheet",
+                customSheetImage
+            );
+
+        } else {
+
+            const cached = localStorage.getItem("customSpriteSheet");
+
+            if (cached) {
+                customSheetImage = cached;
+            }
+
+        }
+
+    } catch (err) {
+
+        console.log("Couldn't load online sprite sheet.");
+
+        const cached = localStorage.getItem("customSpriteSheet");
+
+        if (cached) {
+            customSheetImage = cached;
+        }
+
+    }
+
+}
 
         function initApp() {
             populateOptimizerSelects();
             renderGrid();
             updateProgress();
-            setupTimerDisplay();
+            updateLoadoutOptimization();
         }
 
         function populateOptimizerSelects() {
