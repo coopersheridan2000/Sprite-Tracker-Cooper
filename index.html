@@ -4,245 +4,450 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fortnite Sprite Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #121212;
-            --card-bg: #1e1e1e;
-            --text-main: #f3f4f6;
-            --text-muted: #9ca3af;
+            --bg-body: #0b0f19;
+            --bg-card: rgba(23, 32, 51, 0.75);
+            --bg-card-hover: rgba(30, 41, 67, 0.9);
+            --bg-input: #111827;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-focus: rgba(45, 212, 191, 0.4);
+            
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            
             --rarity-rare: #3b82f6;
             --rarity-epic: #a855f7;
             --rarity-legendary: #f59e0b;
             --rarity-mythic: #ef4444;
             
-            --v-base: #a3a3a3;
+            --v-base: #94a3b8;
             --v-gold: #fbbf24;
             --v-gummy: #ec4899;
-            --v-galaxy: #8b5cf6;
+            --v-galaxy: #a855f7;
             --v-holofoil: #2dd4bf;
-            --v-cube: #d946ef;
+            --v-cube: #e879f9;
+            
+            --accent-teal: #2dd4bf;
+            --accent-amber: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            padding: 20px;
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            padding: 24px 16px;
+            max-width: 1400px;
+            margin: 0 auto;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
         }
 
-        .header-controls {
+        /* Top Header & Search */
+        .app-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 16px;
         }
 
-        .search-bar {
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #333;
-            background: #2a2a2a;
-            color: white;
-            width: 300px;
+        .app-title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #f8fafc 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-input);
+            color: var(--text-primary);
+            width: 280px;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.15);
+        }
+
+        /* Clean Buttons */
         .btn {
-            padding: 10px 15px;
-            border-radius: 5px;
-            border: none;
+            padding: 10px 18px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 600;
+            font-size: 0.875rem;
             color: white;
-            background: #3b82f6;
+            background: #2563eb;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
         }
-        .btn-danger { background: #ef4444; }
 
-        /* Progress Bars */
-        .progress-section {
-            background: var(--card-bg);
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+        .btn:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.25);
+            color: #ffffff;
+        }
+
+        .btn-timer-start { background: #10b981; border: none; }
+        .btn-timer-pause { background: #f59e0b; border: none; }
+
+        /* Overview Panels */
+        .dashboard-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
+            margin-bottom: 24px;
         }
-        .progress-label {
+
+        @media (max-width: 900px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+        }
+
+        .panel-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .panel-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--text-primary);
             display: flex;
             justify-content: space-between;
-            margin-bottom: 5px;
-            font-size: 0.9rem;
-            font-weight: bold;
+            align-items: center;
+        }
+
+        /* Progress Bars */
+        .progress-group {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .progress-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 6px;
         }
         .progress-track {
-            background: #333;
+            background: rgba(15, 23, 42, 0.8);
             height: 10px;
-            border-radius: 5px;
+            border-radius: 999px;
             overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
         .progress-fill {
             height: 100%;
-            background: #2dd4bf;
-            transition: width 0.3s;
+            background: linear-gradient(90deg, #14b8a6, #2dd4bf);
+            border-radius: 999px;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .mastery-fill { background: #f59e0b; }
+        .mastery-fill {
+            background: linear-gradient(90deg, #d97706, #f59e0b);
+        }
 
-        /* Timer & Optimizer Section */
-        .tools-section {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        .tool-card {
-            background: var(--card-bg);
-            padding: 15px;
-            border-radius: 8px;
-        }
+        /* Match Timer & Optimizer */
         .timer-display {
-            font-size: 2rem;
-            font-weight: bold;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2.25rem;
+            font-weight: 600;
             text-align: center;
-            margin: 10px 0;
-            font-family: monospace;
+            margin: 12px 0 16px 0;
+            color: #38bdf8;
+            letter-spacing: 0.05em;
+            text-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
         }
-        .timer-controls { display: flex; justify-content: center; gap: 10px; }
-        .btn-timer-start { background: #10b981; }
-        .btn-timer-pause { background: #f59e0b; }
-        
+        .timer-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
         select {
             width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            background: #2a2a2a;
-            color: white;
-            border: 1px solid #333;
-            border-radius: 5px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            outline: none;
+            cursor: pointer;
+        }
+        select:focus {
+            border-color: var(--border-focus);
         }
 
-        /* Grid */
-        .grid {
+        .optimizer-box {
+            margin-top: 12px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        /* Main Grid */
+        .sprite-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+            gap: 16px;
         }
 
         .card {
-            background: var(--card-bg);
-            border-radius: 8px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
             overflow: hidden;
             cursor: pointer;
             position: relative;
-            border: 2px solid transparent;
-            transition: transform 0.2s;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(8px);
         }
-        .card:hover { transform: translateY(-5px); }
-        .card.completed { border-color: #2dd4bf; }
-        .card.mastered { border-color: #f59e0b; }
+        .card:hover {
+            transform: translateY(-4px);
+            background: var(--bg-card-hover);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.35);
+        }
+        .card.completed {
+            border-color: rgba(45, 212, 191, 0.5);
+            box-shadow: 0 0 15px rgba(45, 212, 191, 0.15);
+        }
+        .card.mastered {
+            border-color: rgba(245, 158, 11, 0.6);
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
+        }
 
         .badge {
             position: absolute;
-            top: 5px;
-            left: 5px;
-            background: rgba(0,0,0,0.8);
-            padding: 2px 6px;
-            font-size: 0.7rem;
-            border-radius: 4px;
-            font-weight: bold;
+            top: 8px;
+            left: 8px;
+            background: rgba(11, 15, 25, 0.85);
+            backdrop-filter: blur(4px);
+            padding: 3px 8px;
+            font-size: 0.65rem;
+            border-radius: 6px;
+            font-weight: 800;
+            letter-spacing: 0.05em;
             z-index: 2;
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .card-preview {
             position: relative;
             width: 100%;
             height: 140px;
-            overflow: hidden;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.05) 0%, transparent 70%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .sprite-img {
             width: 100%;
             height: 100%;
-            image-rendering: pixelated; /* Keeps sprites crisp */
+            image-rendering: pixelated;
         }
-        
-        .owned-stamp, .mastered-stamp {
+
+        .stamp-badge {
             position: absolute;
-            bottom: 5px;
-            right: 5px;
-            padding: 3px 6px;
-            font-size: 0.7rem;
-            font-weight: bold;
-            border-radius: 4px;
+            bottom: 8px;
+            right: 8px;
+            padding: 2px 8px;
+            font-size: 0.65rem;
+            font-weight: 800;
+            border-radius: 6px;
+            letter-spacing: 0.03em;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
         }
-        .owned-stamp { background: #2dd4bf; color: #000; }
-        .mastered-stamp { background: #f59e0b; color: #000; }
+        .owned-stamp { background: var(--accent-teal); color: #0f172a; }
+        .mastered-stamp { background: var(--accent-amber); color: #0f172a; }
+
+        .card-title {
+            padding: 10px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
         .card-variants-bar {
             display: flex;
-            padding: 5px;
+            padding: 8px;
             justify-content: center;
-            gap: 3px;
-            background: rgba(0,0,0,0.3);
+            gap: 6px;
+            background: rgba(11, 15, 25, 0.5);
+            border-top: 1px solid var(--border-color);
         }
         .v-dot {
-            width: 8px; height: 8px; border-radius: 50%;
-            background: #333;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            transition: all 0.2s ease;
         }
-        .active-base { background: var(--v-base); }
-        .active-gold { background: var(--v-gold); }
-        .active-gummy { background: var(--v-gummy); }
-        .active-galaxy { background: var(--v-galaxy); }
-        .active-holofoil { background: var(--v-holofoil); }
-        .active-cube { background: var(--v-cube); }
+        .active-base { background: var(--v-base); box-shadow: 0 0 6px var(--v-base); }
+        .active-gold { background: var(--v-gold); box-shadow: 0 0 6px var(--v-gold); }
+        .active-gummy { background: var(--v-gummy); box-shadow: 0 0 6px var(--v-gummy); }
+        .active-galaxy { background: var(--v-galaxy); box-shadow: 0 0 6px var(--v-galaxy); }
+        .active-holofoil { background: var(--v-holofoil); box-shadow: 0 0 6px var(--v-holofoil); }
+        .active-cube { background: var(--v-cube); box-shadow: 0 0 6px var(--v-cube); }
 
-        /* Modal */
+        /* Modern Modal Styling */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.8);
+            background: rgba(11, 15, 25, 0.8);
+            backdrop-filter: blur(10px);
             display: none;
             justify-content: center;
             align-items: center;
             z-index: 100;
+            padding: 16px;
         }
         .modal-overlay.active { display: flex; }
         .modal-content {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 500px;
-            max-height: 90vh;
+            background: #131c2e;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 24px;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 520px;
+            max-height: 88vh;
             overflow-y: auto;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
         }
 
         .modal-header {
-            display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+            margin-bottom: 16px;
         }
+        
         .modal-chances-grid {
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 15px 0; background: #2a2a2a; padding: 10px; border-radius: 5px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin: 16px 0;
+            background: rgba(15, 23, 42, 0.8);
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
         }
-        .chance-item { display: flex; flex-direction: column; text-align: center; font-size: 0.85rem;}
-        .chance-label { color: var(--text-muted); }
-        .chance-val { font-weight: bold; }
+        .chance-item { display: flex; flex-direction: column; text-align: center; }
+        .chance-label { color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700; }
+        .chance-val { font-weight: 700; font-size: 0.85rem; color: var(--text-primary); margin-top: 2px; }
 
         .variant-item {
-            background: #2a2a2a; padding: 10px; margin-bottom: 10px; border-radius: 5px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 12px;
         }
-        .variant-item-top { margin-bottom: 10px; font-weight: bold; }
-        .variant-controls-group { display: flex; gap: 10px; }
+        .variant-item-top {
+            margin-bottom: 8px;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+        .variant-controls-group { display: flex; gap: 8px; }
         
         .control-pill {
-            flex: 1; padding: 8px; text-align: center; border-radius: 5px; background: #333; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            transition: all 0.2s;
         }
-        .control-pill.active.collected { background: rgba(45, 212, 191, 0.2); border: 1px solid #2dd4bf; }
-        .control-pill.active.mastered { background: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; }
-        .checkbox { width: 16px; height: 16px; border-radius: 3px; border: 2px solid #555; }
-        .control-pill.active .checkbox { background: currentColor; border-color: currentColor; }
-        .control-pill.collected.active .checkbox { background: #2dd4bf; border-color: #2dd4bf; }
-        .control-pill.mastered.active .checkbox { background: #f59e0b; border-color: #f59e0b; }
+        .control-pill:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .control-pill.active.collected {
+            background: rgba(45, 212, 191, 0.12);
+            border-color: var(--accent-teal);
+            color: var(--accent-teal);
+        }
+        .control-pill.active.mastered {
+            background: rgba(245, 158, 11, 0.12);
+            border-color: var(--accent-amber);
+            color: var(--accent-amber);
+        }
+        
+        .checkbox {
+            width: 18px;
+            height: 18px;
+            border-radius: 5px;
+            border: 2px solid var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .control-pill.active .checkbox {
+            border-color: currentColor;
+            background: currentColor;
+        }
 
         .v-color-base { color: var(--v-base); }
         .v-color-gold { color: var(--v-gold); }
@@ -258,66 +463,91 @@
 </head>
 <body>
 
-    <div class="header-controls">
-        <h1>Fortnite Sprite Tracker</h1>
-        <div>
-            <input type="text" id="search" class="search-bar" placeholder="Search sprites or buffs..." onkeyup="renderGrid()">
-            <button class="btn" onclick="triggerAdminUpload()">Update Sprite Sheet (Admin)</button>
-            <button class="btn btn-danger" onclick="resetAll()">Reset All Progress</button>
+    <!-- Header Section -->
+    <header class="app-header">
+        <h1 class="app-title">Fortnite Sprite Tracker</h1>
+        <div class="header-actions">
+            <input type="text" id="search" class="search-input" placeholder="Search sprites or buffs..." onkeyup="renderGrid()">
+            <button class="btn" onclick="triggerAdminUpload()">Admin Sync Sheet</button>
+            <button class="btn btn-danger" onclick="resetAll()">Reset All</button>
             <input type="file" id="file-input" style="display: none;" accept="image/*" onchange="processSpriteSheet(event)">
         </div>
-    </div>
+    </header>
 
-    <div class="progress-section">
-        <div>
-            <div class="progress-label"><span>Total Collected</span> <span id="progress-text">0 / 91 (0%)</span></div>
-            <div class="progress-track"><div class="progress-fill" id="progress-bar" style="width: 0%"></div></div>
-        </div>
-        <div>
-            <div class="progress-label"><span>Total Mastered</span> <span id="mastery-overall-text">0 / 91 (0%)</span></div>
-            <div class="progress-track"><div class="progress-fill mastery-fill" id="mastery-overall-bar" style="width: 0%"></div></div>
-        </div>
-    </div>
-
-    <div class="tools-section">
-        <div class="tool-card">
-            <h3>Match Timer</h3>
-            <div class="timer-display" id="timer-display">02:00:00</div>
-            <div class="timer-controls">
-                <button class="btn btn-timer-start" id="timer-start-btn" onclick="toggleTimer()">Start</button>
-                <button class="btn" onclick="configureTimer()">Set Time</button>
-                <button class="btn btn-danger" onclick="resetTimer()">Reset</button>
+    <!-- Top Dashboard Section -->
+    <div class="dashboard-grid">
+        <!-- Progress Overview -->
+        <div class="panel-card">
+            <div class="panel-title">Overall Progress</div>
+            <div class="progress-group">
+                <div>
+                    <div class="progress-meta">
+                        <span>Total Collected</span>
+                        <span id="progress-text" style="color: var(--accent-teal)">0 / 91 (0%)</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill" id="progress-bar" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="progress-meta">
+                        <span>Total Mastered</span>
+                        <span id="mastery-overall-text" style="color: var(--accent-amber)">0 / 91 (0%)</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill mastery-fill" id="mastery-overall-bar" style="width: 0%"></div>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="tool-card">
-            <h3>Loadout Optimizer</h3>
-            <select id="opt-slot-1" onchange="updateLoadoutOptimization()"></select>
-            <div id="optimizer-output" style="margin-top: 10px; background: #2a2a2a; padding: 10px; border-radius: 5px; font-size: 0.9rem;">
-                Select your equipped sprite above to review its exact buff.
+
+        <!-- Match Timer & Loadout Optimizer -->
+        <div class="dashboard-grid" style="margin-bottom: 0;">
+            <div class="panel-card">
+                <div class="panel-title">Match Timer</div>
+                <div class="timer-display" id="timer-display">02:00:00</div>
+                <div class="timer-controls">
+                    <button class="btn btn-timer-start" id="timer-start-btn" onclick="toggleTimer()">Start</button>
+                    <button class="btn" style="background: rgba(255,255,255,0.08)" onclick="configureTimer()">Set Time</button>
+                    <button class="btn btn-danger" onclick="resetTimer()">Reset</button>
+                </div>
+            </div>
+            <div class="panel-card">
+                <div class="panel-title">Loadout Optimizer</div>
+                <select id="opt-slot-1" onchange="updateLoadoutOptimization()"></select>
+                <div id="optimizer-output" class="optimizer-box">
+                    Select your equipped sprite above to review its active gameplay buff.
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="grid" id="sprite-grid"></div>
+    <!-- Main Grid -->
+    <main class="sprite-grid" id="sprite-grid"></main>
 
     <!-- Details Modal -->
     <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
             <div class="modal-header">
-                <h2 id="modal-title" style="margin:0;">Sprite Name</h2>
-                <button class="btn" onclick="document.getElementById('modal-overlay').classList.remove('active')">Close</button>
+                <h2 id="modal-title" style="font-weight: 800; font-size: 1.3rem;">Sprite Details</h2>
+                <button class="btn" style="background: rgba(255,255,255,0.08)" onclick="document.getElementById('modal-overlay').classList.remove('active')">Close</button>
             </div>
             
-            <p style="font-size: 0.9rem; color: var(--text-muted);"><strong>Found:</strong> <span id="modal-obtain-text"></span></p>
+            <p style="font-size: 0.875rem; color: var(--text-secondary);"><strong>Location:</strong> <span id="modal-obtain-text"></span></p>
             
             <div class="modal-chances-grid" id="modal-chances-grid"></div>
 
-            <div style="margin-bottom: 15px;">
-                <div class="progress-label"><span>Sprite Mastery</span> <span id="modal-mastery-progress-text">0 / 5 (0%)</span></div>
-                <div class="progress-track"><div class="progress-fill mastery-fill" id="modal-mastery-progress-bar" style="width: 0%"></div></div>
+            <div style="margin-bottom: 16px;">
+                <div class="progress-meta">
+                    <span>Sprite Mastery</span>
+                    <span id="modal-mastery-progress-text" style="color: var(--accent-amber);">0 / 5 (0%)</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill mastery-fill" id="modal-mastery-progress-bar" style="width: 0%"></div>
+                </div>
             </div>
 
-            <button class="btn" style="width: 100%; margin-bottom: 15px;" onclick="toggleAllVariantsForCurrentSprite()">Toggle All Collected</button>
+            <button class="btn" style="width: 100%; margin-bottom: 16px; background: rgba(255, 255, 255, 0.08);" onclick="toggleAllVariantsForCurrentSprite()">Toggle All Collected</button>
             
             <div id="variant-list"></div>
         </div>
@@ -326,9 +556,9 @@
     <!-- Timer Alarm Modal -->
     <div class="modal-overlay" id="timer-alarm-overlay">
         <div class="modal-content" style="text-align: center;">
-            <h2 style="color: #ef4444; font-size: 2rem;">Time's Up!</h2>
-            <p>Your configured match timer has ended.</p>
-            <button class="btn" onclick="dismissTimerAlarm()">Dismiss</button>
+            <h2 style="color: #ef4444; font-size: 2rem; margin-bottom: 8px;">Time's Up!</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 20px;">Your match countdown has finished.</p>
+            <button class="btn" onclick="dismissTimerAlarm()">Dismiss Alarm</button>
         </div>
     </div>
 
@@ -336,17 +566,15 @@
 
     <script>
         // --- ADMIN CONFIGURATION ---
-        const BIN_ID = "YOUR_ACTUAL_JSONBIN_BIN_ID";
-        const API_KEY = "$2a$10$YOUR_ACTUAL_JSONBIN_MASTER_KEY";
-        const ADMIN_PASSWORD = "yourpassword"; // Change this to your desired password
+        const BIN_ID = "6a665183f5f4af5e29c463bf";
+        const API_KEY = "$2a$10$jOIt8vSgfNaQzBwTtZZBOuIam3PeIpoDIaY8eSMCXpsKLNtNK9yfK";
+        const ADMIN_PASSWORD = "COOPEROPCOOLS"; // Change password here
 
         // State Management
         let collectedData = JSON.parse(localStorage.getItem('spriteData')) || {};
         let masteryData = JSON.parse(localStorage.getItem('spriteVariantMastery')) || {};
 
-        // Default fallback image
         let customSheetImage = "image_daec01.png";
-
         let activeModalSpriteId = null;
         let hasFiredConfettiThisSession = false;
 
@@ -362,149 +590,37 @@
         function getVariantLabel(key) { return variantMeta[key]?.label || key; }
         function getVariantClassKey(key) { return variantMeta[key]?.className || key; }
 
-        // Core 21 Sprites & 91 Total Variants Context Applied
+        // Core 21 Sprites & 91 Total Variants
         const spritesData = [
-            { 
-                id: 'water', name: 'Water', rarity: 'rare', buff: 'Replenishes Shield (2 → 6 Shield per tick) for its user and their squadmates while in water.', location: 'Spotted near rivers and beaches.',
-                variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], 
-                rates: { base: '—', gold: '0.75%', gummy: '0.62%', galaxy: '0.5%', holofoil: '0.25%' },
-                bg: '#0d324d', row: 0, col: 0 
-            },
-            { 
-                id: 'earth', name: 'Earth', rarity: 'rare', buff: 'Increased chance (10% → 20%) to find additional rare items when opening chests.', location: 'Found wandering around forests and wooded regions.',
-                variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], 
-                rates: { base: '—', gold: '0.75%', gummy: '0.62%', galaxy: '0.5%', cube: '—' },
-                bg: '#172e21', row: 0, col: 1 
-            },
-            { 
-                id: 'fire', name: 'Fire', rarity: 'rare', buff: 'Creates a Fire burst upon dealing enough damage (150 → 50 Damage to trigger) to an enemy.', location: 'Located near urban areas.',
-                variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil', 'cube'], 
-                rates: { base: '—', gold: '0.75%', gummy: '0.62%', galaxy: '0.5%', holofoil: '0.25%', cube: '—' },
-                bg: '#3a2012', row: 0, col: 2 
-            },
-            { 
-                id: 'fishy', name: 'Fishy', rarity: 'rare', buff: 'Swim faster (25% → 200%) and gain a brief speed boost (10% → 50%) when damaged.', location: 'Spotted near rivers and beaches.',
-                variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], // Exactly 5 variants
-                rates: { base: '—', gold: '0.75%', gummy: '0.62%', galaxy: '0.5%', cube: '—' },
-                bg: '#0e2b40', row: 0, col: 3 
-            },
-            { 
-                id: 'air', name: 'Air', rarity: 'rare', buff: 'Increases sprinting speed (10% → 20%) and jump height (10% → 50%).', location: 'Spotted near high and mountainous areas.',
-                variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], 
-                rates: { base: '—', gold: '0.75%', gummy: '0.62%', galaxy: '0.5%', holofoil: '0.25%' },
-                bg: '#0e2b43', row: 0, col: 4 
-            },
-            { 
-                id: 'duck', name: 'Duck', rarity: 'epic', buff: 'Emoting or Jamming replenishes Shield (2 → 8 Shield per tick).', location: 'Found in the vault of a certain business mogul.',
-                variants: ['base', 'gold', 'gummy', 'galaxy'], 
-                rates: { base: '9.00%', gold: '0.4%', gummy: '0.3%', galaxy: '0.16%' },
-                bg: '#33173d', row: 1, col: 0 
-            },
-            { 
-                id: 'ghost', name: 'Ghost', rarity: 'epic', buff: 'Grants Cloak for a short duration upon reloading (3 → 5 seconds).', location: 'Found in the world at nighttime.',
-                variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], 
-                rates: { base: '9.00%', gold: '0.4%', gummy: '0.3%', galaxy: '0.16%', holofoil: '0.06%' },
-                bg: '#35183f', row: 1, col: 1 
-            },
-            { 
-                id: 'demon', name: 'Demon', rarity: 'epic', buff: 'Grants Siphon (10 HP → 30 HP per elimination) upon eliminating an opponent.', location: 'Found rarely in Sprite Chests.',
-                variants: ['base', 'gold', 'gummy', 'galaxy'], 
-                rates: { base: '9.00%', gold: '0.4%', gummy: '0.3%', galaxy: '0.16%' },
-                bg: '#2b1535', row: 1, col: 2 
-            },
-            { 
-                id: 'king', name: 'King', rarity: 'epic', buff: 'Grants increased Pickaxe damage (30 → 120).', location: 'Found rarely in Sprite Chests.',
-                variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], 
-                rates: { base: '9.00%', gold: '0.4%', gummy: '0.3%', galaxy: '0.16%', holofoil: '0.06%' },
-                bg: '#1f1b31', row: 1, col: 3 
-            },
-            { 
-                id: 'aura', name: 'Aura', rarity: 'epic', buff: 'Gain a Shock Rock charge when you deal enough damage to enemies (175 → 75 Damage to trigger).', location: 'Found rarely in Sprite Chests.',
-                variants: ['base', 'gold', 'gummy', 'galaxy'], 
-                rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%' },
-                bg: '#221931', row: 1, col: 4 
-            },
-            { 
-                id: 'striker', name: 'Striker', rarity: 'epic', buff: 'Gain an Overdrive (6 → 10 seconds) boost when you mantle, hurdle, or wall scramble.', location: 'Found rarely in Sprite Chests.',
-                variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], 
-                rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%', holofoil: '0.05%' },
-                bg: '#2d183d', row: 2, col: 0 
-            },
-            { 
-                id: 'dream', name: 'Dream', rarity: 'legendary', buff: 'Grants a random item every time the Sprite is leveled up. Upon reaching max level, the Sprite explodes with Legendary loot, resets to Level 1 and is automatically extracted.', location: 'Sometimes found sleeping in the storage crates.',
-                variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], 
-                rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%', cube: '—' },
-                bg: '#402011', row: 2, col: 1 
-            },
-            { 
-                id: 'punk', name: 'Punk', rarity: 'legendary', buff: 'Does nothing until Level 5, in which it will always grant a buff for unlimited ammo.', location: 'Found rarely in Sprite Chests.',
-                variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], 
-                rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%', cube: '—' },
-                bg: '#45200d', row: 2, col: 2 
-            },
-            { 
-                id: 'boss', name: 'Boss', rarity: 'legendary', buff: 'Boosts your maximum Health (5 → 25) and Shield (5 → 25).', location: 'Found rarely in Sprite Chests.',
-                variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], 
-                rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%', cube: '—' },
-                bg: '#412211', row: 2, col: 3 
-            },
-            { 
-                id: 'seven', name: 'Seven', rarity: 'legendary', buff: 'Reveal enemy foot trails to all nearby squadmates around the island.', location: 'Found rarely in Sprite Chests.',
-                variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], 
-                rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%', holofoil: '0.05%' },
-                bg: '#3b2413', row: 2, col: 4 
-            },
-            { 
-                id: 'grim', name: 'Grim Reaper', rarity: 'mythic', buff: 'Opponents who attacks its user get Scanned for a short duration (3 → 5 seconds).', location: 'Found rarely in Sprite Chests.',
-                variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], 
-                rates: { base: '0.0900000%', gold: '—', gummy: '—', galaxy: '—', cube: '—' },
-                bg: '#3d3413', row: 3, col: 0 
-            },
-            { 
-                id: 'zeropoint', name: 'Zero Point', rarity: 'mythic', buff: 'Spawns a Shield Bubble Jr. (6 → 10 seconds) around the player when they use a healing item.', location: 'Found rarely in Sprite Chests.',
-                variants: ['base', 'gold', 'gummy', 'galaxy'], 
-                rates: { base: '0.0009300%', gold: '—', gummy: '—', galaxy: '—' },
-                bg: '#3a3212', row: 3, col: 1 
-            },
-            { 
-                id: 'burntpeanut', name: 'Burnt Peanut', rarity: 'mythic', buff: 'Grants a low chance for additional loot (20% → 60%) from eliminations, including Mythic loot (10% at max level).', location: 'Found in Relic Chests.',
-                variants: ['base'], 
-                rates: { base: '—' },
-                bg: '#432e12', row: 3, col: 2 
-            },
-            { 
-                id: 'batman', name: 'Batman', rarity: 'mythic', buff: 'Launches the user upwards and deploy Bat Cape.', location: 'Found rarely in Sprite Chests.',
-                variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil', 'cube'], 
-                rates: { base: '2.23%', gold: '0.1%', gummy: '0.07%', galaxy: '0.04%', holofoil: '0.01%', cube: '—' },
-                bg: '#3a3413', row: 3, col: 3 
-            },
-            { 
-                id: 'pollo', name: 'Pollo', rarity: 'mythic', buff: 'Replenishes Shield for its user and their squadmates in a short amount of time (6 → 10 seconds) after eliminating an enemy player.', location: 'Found rarely in Sprite Chests.',
-                variants: ['base'], 
-                rates: { base: '1.50%' },
-                bg: '#342211', row: 3, col: 4 
-            },
-            { 
-                id: 'vini', name: 'Vini Jr.', rarity: 'mythic', buff: 'Grants a heavy increase to structural damage (40 → 60) after sprinting and an Overdrive after sliding. Slide-kicking the enemies will increase fire rate and reload speed buff (10% → 50%).', location: 'Found in Relic Chests.',
-                variants: ['base'], 
-                rates: { base: '1.00%' },
-                bg: '#252233', row: 4, col: 0 
-            }
+            { id: 'water', name: 'Water', rarity: 'rare', buff: 'Replenishes Shield (2 → 6 Shield per tick) for user and squadmates in water.', location: 'Near rivers and beaches.', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], rates: { base: '—', gold: '0.75%', gummy: '0.62%', galaxy: '0.5%', holofoil: '0.25%' }, bg: '#0d324d', row: 0, col: 0 },
+            { id: 'earth', name: 'Earth', rarity: 'rare', buff: 'Increased chance (10% → 20%) to find extra rare items in chests.', location: 'Forests and wooded regions.', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], rates: { base: '—', gold: '0.75%', gummy: '0.62%', galaxy: '0.5%', cube: '—' }, bg: '#172e21', row: 0, col: 1 },
+            { id: 'fire', name: 'Fire', rarity: 'rare', buff: 'Creates a Fire burst upon dealing enough damage (150 → 50 Damage).', location: 'Urban areas.', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil', 'cube'], rates: { base: '—', gold: '0.75%', gummy: '0.62%', galaxy: '0.5%', holofoil: '0.25%', cube: '—' }, bg: '#3a2012', row: 0, col: 2 },
+            { id: 'fishy', name: 'Fishy', rarity: 'rare', buff: 'Swim faster (25% → 200%) and gain speed boost when damaged.', location: 'Rivers and beaches.', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], rates: { base: '—', gold: '0.75%', gummy: '0.62%', galaxy: '0.5%', cube: '—' }, bg: '#0e2b40', row: 0, col: 3 },
+            { id: 'air', name: 'Air', rarity: 'rare', buff: 'Increases sprint speed (10% → 20%) and jump height (10% → 50%).', location: 'Mountainous areas.', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], rates: { base: '—', gold: '0.75%', gummy: '0.62%', galaxy: '0.5%', holofoil: '0.25%' }, bg: '#0e2b43', row: 0, col: 4 },
+            { id: 'duck', name: 'Duck', rarity: 'epic', buff: 'Emoting or Jamming replenishes Shield (2 → 8 Shield per tick).', location: 'Business mogul vault.', variants: ['base', 'gold', 'gummy', 'galaxy'], rates: { base: '9.00%', gold: '0.4%', gummy: '0.3%', galaxy: '0.16%' }, bg: '#33173d', row: 1, col: 0 },
+            { id: 'ghost', name: 'Ghost', rarity: 'epic', buff: 'Grants Cloak upon reloading (3 → 5 seconds).', location: 'World at nighttime.', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], rates: { base: '9.00%', gold: '0.4%', gummy: '0.3%', galaxy: '0.16%', holofoil: '0.06%' }, bg: '#35183f', row: 1, col: 1 },
+            { id: 'demon', name: 'Demon', rarity: 'epic', buff: 'Grants Siphon (10 HP → 30 HP) upon eliminations.', location: 'Sprite Chests.', variants: ['base', 'gold', 'gummy', 'galaxy'], rates: { base: '9.00%', gold: '0.4%', gummy: '0.3%', galaxy: '0.16%' }, bg: '#2b1535', row: 1, col: 2 },
+            { id: 'king', name: 'King', rarity: 'epic', buff: 'Increased Pickaxe damage (30 → 120).', location: 'Sprite Chests.', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], rates: { base: '9.00%', gold: '0.4%', gummy: '0.3%', galaxy: '0.16%', holofoil: '0.06%' }, bg: '#1f1b31', row: 1, col: 3 },
+            { id: 'aura', name: 'Aura', rarity: 'epic', buff: 'Gain a Shock Rock charge on damage dealt (175 → 75 Damage).', location: 'Sprite Chests.', variants: ['base', 'gold', 'gummy', 'galaxy'], rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%' }, bg: '#221931', row: 1, col: 4 },
+            { id: 'striker', name: 'Striker', rarity: 'epic', buff: 'Gain Overdrive boost (6 → 10s) when mantling or hurdling.', location: 'Sprite Chests.', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%', holofoil: '0.05%' }, bg: '#2d183d', row: 2, col: 0 },
+            { id: 'dream', name: 'Dream', rarity: 'legendary', buff: 'Grants items on level up. Explodes with Legendary loot at max level.', location: 'Storage crates.', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%', cube: '—' }, bg: '#402011', row: 2, col: 1 },
+            { id: 'punk', name: 'Punk', rarity: 'legendary', buff: 'At Level 5 grants unlimited ammo.', location: 'Sprite Chests.', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%', cube: '—' }, bg: '#45200d', row: 2, col: 2 },
+            { id: 'boss', name: 'Boss', rarity: 'legendary', buff: 'Boosts max Health (5 → 25) and Shield (5 → 25).', location: 'Sprite Chests.', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%', cube: '—' }, bg: '#412211', row: 2, col: 3 },
+            { id: 'seven', name: 'Seven', rarity: 'legendary', buff: 'Reveal enemy foot trails to nearby squadmates.', location: 'Sprite Chests.', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%', holofoil: '0.05%' }, bg: '#3b2413', row: 2, col: 4 },
+            { id: 'grim', name: 'Grim Reaper', rarity: 'mythic', buff: 'Attacking opponents get Scanned (3 → 5 seconds).', location: 'Sprite Chests.', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], rates: { base: '0.09%', gold: '—', gummy: '—', galaxy: '—', cube: '—' }, bg: '#3d3413', row: 3, col: 0 },
+            { id: 'zeropoint', name: 'Zero Point', rarity: 'mythic', buff: 'Spawns Shield Bubble Jr. (6 → 10s) when using heal items.', location: 'Sprite Chests.', variants: ['base', 'gold', 'gummy', 'galaxy'], rates: { base: '0.00093%', gold: '—', gummy: '—', galaxy: '—' }, bg: '#3a3212', row: 3, col: 1 },
+            { id: 'burntpeanut', name: 'Burnt Peanut', rarity: 'mythic', buff: 'Extra loot chance (20% → 60%) from eliminations.', location: 'Relic Chests.', variants: ['base'], rates: { base: '—' }, bg: '#432e12', row: 3, col: 2 },
+            { id: 'batman', name: 'Batman', rarity: 'mythic', buff: 'Launches user upwards and deploys Bat Cape.', location: 'Sprite Chests.', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil', 'cube'], rates: { base: '2.23%', gold: '0.1%', gummy: '0.07%', galaxy: '0.04%', holofoil: '0.01%', cube: '—' }, bg: '#3a3413', row: 3, col: 3 },
+            { id: 'pollo', name: 'Pollo', rarity: 'mythic', buff: 'Replenishes Shield after eliminating enemy players.', location: 'Sprite Chests.', variants: ['base'], rates: { base: '1.50%' }, bg: '#342211', row: 3, col: 4 },
+            { id: 'vini', name: 'Vini Jr.', rarity: 'mythic', buff: 'Increases structural damage and slide kick buffs.', location: 'Relic Chests.', variants: ['base'], rates: { base: '1.00%' }, bg: '#252233', row: 4, col: 0 }
         ];
-        
+
         async function loadLatestSpriteSheet() {
             try {
-                const response = await fetch(
-                    `https://api.jsonbin.io/v3/b/${BIN_ID}/latest`,
-                    {
-                        headers: {
-                            "X-Master-Key": API_KEY
-                        }
-                    }
-                );
-
+                const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+                    headers: { "X-Master-Key": API_KEY }
+                });
                 const data = await response.json();
-
                 if (data.record && data.record.spriteSheet) {
                     customSheetImage = data.record.spriteSheet;
                     localStorage.setItem("customSpriteSheet", customSheetImage);
@@ -513,7 +629,6 @@
                     if (cached) customSheetImage = cached;
                 }
             } catch (err) {
-                console.log("Couldn't load online sprite sheet.", err);
                 const cached = localStorage.getItem("customSpriteSheet");
                 if (cached) customSheetImage = cached;
             }
@@ -522,10 +637,7 @@
         async function initApp() {
             populateOptimizerSelects();
             setupTimerDisplay();
-            
-            // Fetch online sprite sheet before first grid render
             await loadLatestSpriteSheet();
-
             renderGrid();
             updateProgress();
             updateLoadoutOptimization();
@@ -545,17 +657,14 @@
             const output = document.getElementById('optimizer-output');
             
             if (!slot1Id) {
-                output.innerHTML = 'Select your equipped sprite above to review its exact buff.';
+                output.innerHTML = 'Select your equipped sprite above to review its active gameplay buff.';
                 return;
             }
 
             const sprite = spritesData.find(s => s.id === slot1Id);
-            if (!sprite) {
-                output.innerHTML = 'Sprite not found.';
-                return;
-            }
+            if (!sprite) return;
 
-            output.innerHTML = `<strong style="color: var(--rarity-${sprite.rarity}); font-size: 1rem;">${sprite.name} Sprite (${sprite.rarity.toUpperCase()})</strong><br><span style="color: #2dd4bf; font-size: 0.95rem; margin-top: 4px; display: block;">Buff: ${sprite.buff}</span>`;
+            output.innerHTML = `<strong style="color: var(--rarity-${sprite.rarity}); font-size: 0.95rem;">${sprite.name} Sprite (${sprite.rarity.toUpperCase()})</strong><br><span style="color: var(--accent-teal); font-size: 0.85rem; margin-top: 4px; display: block;">Buff: ${sprite.buff}</span>`;
         }
 
         function renderGrid() {
@@ -569,7 +678,6 @@
                 }
 
                 const variants = s.variants;
-                const totalVariants = variants.length;
                 let collectedCount = 0;
                 let masteredCount = 0;
 
@@ -578,8 +686,8 @@
                     if (masteryData[s.id]?.[v]) masteredCount++;
                 });
 
-                const isCompleted = collectedCount === totalVariants;
-                const isMastered = masteredCount === totalVariants;
+                const isCompleted = collectedCount === variants.length;
+                const isMastered = masteredCount === variants.length;
 
                 const card = document.createElement('div');
                 card.className = `card ${isMastered ? 'mastered' : (isCompleted ? 'completed' : '')}`;
@@ -596,9 +704,9 @@
                     <div class="badge" style="color: var(--rarity-${s.rarity});">${s.rarity.toUpperCase()}</div>
                     <div class="card-preview">
                         <div class="sprite-img" style="background: ${s.bg}; background-image: url('${customSheetImage}'); background-size: 500% 500%; background-position: -${s.col * 100}% -${s.row * 100}%;"></div>
-                        ${isMastered ? '<div class="mastered-stamp">MASTERED</div>' : (isCompleted ? '<div class="owned-stamp">COLLECTED</div>' : '')}
+                        ${isMastered ? '<div class="stamp-badge mastered-stamp">MASTERED</div>' : (isCompleted ? '<div class="stamp-badge owned-stamp">OWNED</div>' : '')}
                     </div>
-                    <div style="padding: 10px; font-size: 0.9rem; font-weight: 800; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--rarity-${s.rarity});">
+                    <div class="card-title" style="color: var(--rarity-${s.rarity});">
                         ${s.name}
                     </div>
                     <div class="card-variants-bar">
@@ -666,8 +774,8 @@
                 item.className = `variant-item`;
 
                 item.innerHTML = `
-                    <div class="variant-item-top">
-                        <div class="variant-label v-color-${getVariantClassKey(v)}">${getVariantLabel(v)} Variant</div>
+                    <div class="variant-item-top v-color-${getVariantClassKey(v)}">
+                        ${getVariantLabel(v)} Variant
                     </div>
                     <div class="variant-controls-group">
                         <div class="control-pill collected ${isCollected ? 'active' : ''}" onclick="toggleVariant('${s.id}', '${v}')">
@@ -725,43 +833,35 @@
         }
 
         function updateProgress() {
-            let totalVariantsCount = 0;
-            let collectedVariantsCount = 0;
-            let masteredVariantsCount = 0;
+            let totalVariants = 0, collectedCount = 0, masteredCount = 0;
 
             spritesData.forEach(s => {
                 s.variants.forEach(v => {
-                    totalVariantsCount++;
-                    if (collectedData[s.id]?.[v]) {
-                        collectedVariantsCount++;
-                    }
-                    if (masteryData[s.id]?.[v]) {
-                        masteredVariantsCount++;
-                    }
+                    totalVariants++;
+                    if (collectedData[s.id]?.[v]) collectedCount++;
+                    if (masteryData[s.id]?.[v]) masteredCount++;
                 });
             });
 
-            const collectedPercent = totalVariantsCount > 0 ? Math.round((collectedVariantsCount / totalVariantsCount) * 100) : 0;
-            document.getElementById('progress-text').innerText = `${collectedVariantsCount} / ${totalVariantsCount} (${collectedPercent}%)`;
+            const collectedPercent = totalVariants > 0 ? Math.round((collectedCount / totalVariants) * 100) : 0;
+            document.getElementById('progress-text').innerText = `${collectedCount} / ${totalVariants} (${collectedPercent}%)`;
             document.getElementById('progress-bar').style.width = `${collectedPercent}%`;
 
-            const masteryPercent = totalVariantsCount > 0 ? Math.round((masteredVariantsCount / totalVariantsCount) * 100) : 0;
-            document.getElementById('mastery-overall-text').innerText = `${masteredVariantsCount} / ${totalVariantsCount} (${masteryPercent}%)`;
+            const masteryPercent = totalVariants > 0 ? Math.round((masteredCount / totalVariants) * 100) : 0;
+            document.getElementById('mastery-overall-text').innerText = `${masteredCount} / ${totalVariants} (${masteryPercent}%)`;
             document.getElementById('mastery-overall-bar').style.width = `${masteryPercent}%`;
         }
 
         function checkCompletionCelebration() {
-            let totalVariantsCount = 0;
-            let collectedVariantsCount = 0;
-
+            let totalVariants = 0, collectedCount = 0;
             spritesData.forEach(s => {
                 s.variants.forEach(v => {
-                    totalVariantsCount++;
-                    if (collectedData[s.id]?.[v]) collectedVariantsCount++;
+                    totalVariants++;
+                    if (collectedData[s.id]?.[v]) collectedCount++;
                 });
             });
 
-            if (collectedVariantsCount === totalVariantsCount && !hasFiredConfettiThisSession) {
+            if (collectedCount === totalVariants && !hasFiredConfettiThisSession) {
                 hasFiredConfettiThisSession = true;
                 fireConfetti();
             }
@@ -774,30 +874,20 @@
                 return;
             }
 
-            const choice = prompt(
-                "Choose sprite sheet upload method:\n\n" +
-                "1. Paste Image URL (Recommended for Cloud Sync)\n" +
-                "2. Upload Local File", 
-                "1"
-            );
-
+            const choice = prompt("1. Paste Image URL (Recommended for Cloud Sync)\n2. Upload Local File", "1");
             if (choice === "1") {
-                const url = prompt("Paste direct image URL (e.g., https://i.imgur.com/your-image.png):");
-                if (url && url.trim()) {
-                    saveSpriteSheetToCloud(url.trim());
-                }
+                const url = prompt("Paste direct image URL:");
+                if (url && url.trim()) saveSpriteSheetToCloud(url.trim());
             } else if (choice === "2") {
                 document.getElementById('file-input').click();
             }
         }
 
         async function saveSpriteSheetToCloud(imageUrlOrData) {
-            // 1. Instantly update UI and Local Cache
             customSheetImage = imageUrlOrData;
             localStorage.setItem('customSpriteSheet', customSheetImage);
             renderGrid();
 
-            // 2. Sync to JSONBin
             try {
                 const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
                     method: "PUT",
@@ -808,32 +898,16 @@
                     body: JSON.stringify({ spriteSheet: imageUrlOrData })
                 });
 
-                if (response.ok) {
-                    alert("Sprite sheet updated and synced to the cloud successfully!");
-                } else {
-                    const errData = await response.json().catch(() => ({}));
-                    alert(`Cloud sync failed (HTTP ${response.status}): ${errData.message || 'Check your BIN_ID and API_KEY constants.'}`);
-                }
+                if (response.ok) alert("Sprite sheet synced successfully!");
+                else alert("Cloud sync failed. Check your JSONBin credentials.");
             } catch (err) {
-                console.error("Cloud upload error:", err);
-                alert("Network error: Failed to connect to JSONBin.");
+                alert("Network error: Failed to sync with JSONBin.");
             }
         }
 
         async function processSpriteSheet(event) {
             const file = event.target.files[0];
             if (!file) return;
-
-            // Warn if file size exceeds JSONBin's 100KB free limit
-            if (file.size > 100 * 1024) {
-                const proceed = confirm(
-                    `Warning: File size is ${Math.round(file.size / 1024)} KB.\n` +
-                    `JSONBin free tier caps records at 100 KB, so direct file Base64 uploads will likely fail.\n\n` +
-                    `Tip: Upload your image to Imgur or GitHub Pages and paste the URL instead.\n\n` +
-                    `Attempt upload anyway?`
-                );
-                if (!proceed) return;
-            }
 
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -843,7 +917,7 @@
         }
 
         function resetAll() {
-            if (confirm("Are you sure you want to reset all collected and mastered progress?")) {
+            if (confirm("Reset all sprite progress?")) {
                 localStorage.removeItem('spriteData');
                 localStorage.removeItem('spriteVariantMastery');
                 collectedData = {};
@@ -851,26 +925,20 @@
                 hasFiredConfettiThisSession = false;
                 renderGrid();
                 updateProgress();
-                if (activeModalSpriteId) {
-                    openModal(activeModalSpriteId);
-                }
+                if (activeModalSpriteId) openModal(activeModalSpriteId);
             }
         }
 
-        // Timer Functionality
-        let timerSeconds = 7200;
-        let timerInterval = null;
-        let isTimerRunning = false;
+        // Match Timer
+        let timerSeconds = 7200, timerInterval = null, isTimerRunning = false;
 
-        function setupTimerDisplay() {
-            updateTimerDisplayUI();
-        }
-
+        function setupTimerDisplay() { updateTimerDisplayUI(); }
+        
         function updateTimerDisplayUI() {
-            const hours = String(Math.floor(timerSeconds / 3600)).padStart(2, '0');
-            const minutes = String(Math.floor((timerSeconds % 3600) / 60)).padStart(2, '0');
-            const seconds = String(timerSeconds % 60).padStart(2, '0');
-            document.getElementById('timer-display').innerText = `${hours}:${minutes}:${seconds}`;
+            const h = String(Math.floor(timerSeconds / 3600)).padStart(2, '0');
+            const m = String(Math.floor((timerSeconds % 3600) / 60)).padStart(2, '0');
+            const s = String(timerSeconds % 60).padStart(2, '0');
+            document.getElementById('timer-display').innerText = `${h}:${m}:${s}`;
         }
 
         function toggleTimer() {
@@ -892,8 +960,7 @@
                     if (timerSeconds > 0) {
                         timerSeconds--;
                         updateTimerDisplayUI();
-                    }
-                    if (timerSeconds <= 0) {
+                    } else {
                         clearInterval(timerInterval);
                         isTimerRunning = false;
                         btn.innerText = 'Start';
@@ -914,9 +981,7 @@
         }
 
         function resetTimer() {
-            if (isTimerRunning) {
-                toggleTimer();
-            }
+            if (isTimerRunning) toggleTimer();
             timerSeconds = 7200;
             updateTimerDisplayUI();
         }
@@ -938,10 +1003,8 @@
             const particles = [];
             for (let i = 0; i < 150; i++) {
                 particles.push({
-                    x: canvas.width / 2,
-                    y: canvas.height / 2,
-                    vx: (Math.random() - 0.5) * 14,
-                    vy: (Math.random() - 0.5) * 14 - 4,
+                    x: canvas.width / 2, y: canvas.height / 2,
+                    vx: (Math.random() - 0.5) * 14, vy: (Math.random() - 0.5) * 14 - 4,
                     size: Math.random() * 8 + 4,
                     color: ['#facc15', '#8b5cf6', '#2dd4bf', '#3b82f6', '#f472b6'][Math.floor(Math.random() * 5)],
                     life: Math.random() * 100 + 50
@@ -951,19 +1014,13 @@
             function animate() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 particles.forEach((p, index) => {
-                    p.x += p.vx;
-                    p.y += p.vy;
-                    p.vy += 0.3;
-                    p.life--;
+                    p.x += p.vx; p.y += p.vy; p.vy += 0.3; p.life--;
                     ctx.fillStyle = p.color;
                     ctx.fillRect(p.x, p.y, p.size, p.size);
                     if (p.life <= 0) particles.splice(index, 1);
                 });
-                if (particles.length > 0) {
-                    requestAnimationFrame(animate);
-                } else {
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                }
+                if (particles.length > 0) requestAnimationFrame(animate);
+                else ctx.clearRect(0, 0, canvas.width, canvas.height);
             }
             animate();
         }
