@@ -522,344 +522,351 @@
         </div>
     </div>
 
-    <!-- Main Grid -->
-    <main class="sprite-grid" id="sprite-grid"></main>
+      <!-- Main Grid -->
+<main class="sprite-grid" id="sprite-grid"></main>
 
-    <!-- Details Modal -->
-    <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <div class="modal-header">
-                <h2 id="modal-title" style="font-weight: 800; font-size: 1.3rem;">Sprite Details</h2>
-                <button class="btn" style="background: rgba(255,255,255,0.08)" onclick="document.getElementById('modal-overlay').classList.remove('active')">Close</button>
-            </div>
-            
-            <p style="font-size: 0.875rem; color: var(--text-secondary);"><strong>Location:</strong> <span id="modal-obtain-text"></span></p>
-            
-            <div class="modal-chances-grid" id="modal-chances-grid"></div>
-
-            <div style="margin-bottom: 16px;">
-                <div class="progress-meta">
-                    <span>Sprite Mastery</span>
-                    <span id="modal-mastery-progress-text" style="color: var(--accent-amber);">0 / 5 (0%)</span>
-                </div>
-                <div class="progress-track">
-                    <div class="progress-fill mastery-fill" id="modal-mastery-progress-bar" style="width: 0%"></div>
-                </div>
-            </div>
-
-            <button class="btn" style="width: 100%; margin-bottom: 16px; background: rgba(255, 255, 255, 0.08);" onclick="toggleAllVariantsForCurrentSprite()">Toggle All Collected</button>
-            
-            <div id="variant-list"></div>
+<!-- Details Modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h2 id="modal-title" style="font-weight: 800; font-size: 1.3rem;">Sprite Details</h2>
+            <button class="btn" style="background: rgba(255,255,255,0.08)" onclick="document.getElementById('modal-overlay').classList.remove('active')">Close</button>
         </div>
-    </div>
+        
+        <p style="font-size: 0.875rem; color: var(--text-secondary);"><strong>Location:</strong> <span id="modal-obtain-text"></span></p>
+        
+        <div class="modal-chances-grid" id="modal-chances-grid"></div>
 
-    <!-- Timer Alarm Modal -->
-    <div class="modal-overlay" id="timer-alarm-overlay">
-        <div class="modal-content" style="text-align: center;">
-            <h2 style="color: #ef4444; font-size: 2rem; margin-bottom: 8px;">Time's Up!</h2>
-            <p style="color: var(--text-secondary); margin-bottom: 20px;">Your match countdown has finished.</p>
-            <button class="btn" onclick="dismissTimerAlarm()">Dismiss Alarm</button>
+        <div style="margin-bottom: 16px;">
+            <div class="progress-meta">
+                <span>Sprite Mastery</span>
+                <span id="modal-mastery-progress-text" style="color: var(--accent-amber);">0 / 5 (0%)</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill mastery-fill" id="modal-mastery-progress-bar" style="width: 0%"></div>
+            </div>
         </div>
+
+        <button class="btn" style="width: 100%; margin-bottom: 16px; background: rgba(255, 255, 255, 0.08);" onclick="toggleAllVariantsForCurrentSprite()">Toggle All Collected</button>
+        
+        <div id="variant-list"></div>
     </div>
+</div>
 
-    <canvas id="confetti-canvas"></canvas>
+<!-- Timer Alarm Modal -->
+<div class="modal-overlay" id="timer-alarm-overlay">
+    <div class="modal-content" style="text-align: center;">
+        <h2 style="color: #ef4444; font-size: 2rem; margin-bottom: 8px;">Time's Up!</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 20px;">Your match countdown has finished.</p>
+        <button class="btn" onclick="dismissTimerAlarm()">Dismiss Alarm</button>
+    </div>
+</div>
 
-    <script>
-        // --- ADMIN CONFIGURATION ---
-        const BIN_ID = "6a665183f5f4af5e29c463bf";
-        const API_KEY = "$2a$10$jOIt8vSgfNaQzBwTtZZBOuIam3PeIpoDIaY8eSMCXpsKLNtNK9yfK";
-        const ADMIN_PASSWORD = "COOPEROPCOOLS"; // Change password here
+<canvas id="confetti-canvas"></canvas>
 
-        // State Management
-        let collectedData = JSON.parse(localStorage.getItem('spriteData')) || {};
-        let masteryData = JSON.parse(localStorage.getItem('spriteVariantMastery')) || {};
+<script>
+    // --- ADMIN CONFIGURATION ---
+    const BIN_ID = "6a665183f5f4af5e29c463bf";
+    const API_KEY = "$2a$10$jOIt8vSgfNaQzBwTtZZBOuIam3PeIpoDIaY8eSMCXpsKLNtNK9yfK";
+    const ADMIN_PASSWORD = "COOPEROPCOOLS"; // Change password here
 
-        let customSheetImage = "https://github.com/coopersheridan2000/Sprite-Tracker-PNG/blob/main/Screenshot%202026-07-26%20155937.png?raw=true";
-        let activeModalSpriteId = null;
-        let hasFiredConfettiThisSession = false;
+    // State Management
+    let collectedData = JSON.parse(localStorage.getItem('spriteData')) || {};
+    let masteryData = JSON.parse(localStorage.getItem('spriteVariantMastery')) || {};
 
-        const variantMeta = {
-            base: { label: 'Base', className: 'base' },
-            gold: { label: 'Gold', className: 'gold' },
-            gummy: { label: 'Gummy', className: 'gummy' },
-            galaxy: { label: 'Galaxy', className: 'galaxy' },
-            holofoil: { label: 'Holofoil', className: 'holofoil' },
-            cube: { label: 'Cube', className: 'cube' }
-        };
+    let customSheetImage = "https://github.com/coopersheridan2000/Sprite-Tracker-PNG/blob/main/Screenshot%202026-07-30%20183141.png?raw=true";
+    let activeModalSpriteId = null;
+    let hasFiredConfettiThisSession = false;
 
-        function getVariantLabel(key) { return variantMeta[key]?.label || key; }
-        function getVariantClassKey(key) { return variantMeta[key]?.className || key; }
+    const variantMeta = {
+        base: { label: 'Base', className: 'base' },
+        gold: { label: 'Gold', className: 'gold' },
+        gummy: { label: 'Gummy', className: 'gummy' },
+        galaxy: { label: 'Galaxy', className: 'galaxy' },
+        holofoil: { label: 'Holofoil', className: 'holofoil' },
+        cube: { label: 'Cube', className: 'cube' },
+        gem: { label: 'Gem', className: 'gem' },
+        quack: { label: 'Quack', className: 'quack' }
+    };
 
-        // Core 21 Sprites & 91 Total Variants
-        const spritesData = [
-            { id: 'water', name: 'Water', rarity: 'rare', buff: 'Replenishes Shield (2 → 6 Shield per tick) for user and squadmates in water.', location: 'Near rivers and beaches.', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], rates: { base: '—', gold: '0.75%', gummy: '0.62%', galaxy: '0.5%', holofoil: '0.25%' }, bg: '#0d324d', row: 0, col: 0 },
-            { id: 'earth', name: 'Earth', rarity: 'rare', buff: 'Increased chance (10% → 20%) to find extra rare items in chests.', location: 'Forests and wooded regions.', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], rates: { base: '—', gold: '0.75%', gummy: '0.62%', galaxy: '0.5%', cube: '—' }, bg: '#172e21', row: 0, col: 1 },
-            { id: 'fire', name: 'Fire', rarity: 'rare', buff: 'Creates a Fire burst upon dealing enough damage (150 → 50 Damage).', location: 'Urban areas.', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil', 'cube'], rates: { base: '—', gold: '0.75%', gummy: '0.62%', galaxy: '0.5%', holofoil: '0.25%', cube: '—' }, bg: '#3a2012', row: 0, col: 2 },
-            { id: 'fishy', name: 'Fishy', rarity: 'rare', buff: 'Swim faster (25% → 200%) and gain speed boost when damaged.', location: 'Rivers and beaches.', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], rates: { base: '—', gold: '0.75%', gummy: '0.62%', galaxy: '0.5%', cube: '—' }, bg: '#0e2b40', row: 0, col: 3 },
-            { id: 'air', name: 'Air', rarity: 'rare', buff: 'Increases sprint speed (10% → 20%) and jump height (10% → 50%).', location: 'Mountainous areas.', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], rates: { base: '—', gold: '0.75%', gummy: '0.62%', galaxy: '0.5%', holofoil: '0.25%' }, bg: '#0e2b43', row: 0, col: 4 },
-            { id: 'duck', name: 'Duck', rarity: 'epic', buff: 'Emoting or Jamming replenishes Shield (2 → 8 Shield per tick).', location: 'Business mogul vault.', variants: ['base', 'gold', 'gummy', 'galaxy'], rates: { base: '9.00%', gold: '0.4%', gummy: '0.3%', galaxy: '0.16%' }, bg: '#33173d', row: 1, col: 0 },
-            { id: 'ghost', name: 'Ghost', rarity: 'epic', buff: 'Grants Cloak upon reloading (3 → 5 seconds).', location: 'World at nighttime.', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], rates: { base: '9.00%', gold: '0.4%', gummy: '0.3%', galaxy: '0.16%', holofoil: '0.06%' }, bg: '#35183f', row: 1, col: 1 },
-            { id: 'demon', name: 'Demon', rarity: 'epic', buff: 'Grants Siphon (10 HP → 30 HP) upon eliminations.', location: 'Sprite Chests.', variants: ['base', 'gold', 'gummy', 'galaxy'], rates: { base: '9.00%', gold: '0.4%', gummy: '0.3%', galaxy: '0.16%' }, bg: '#2b1535', row: 1, col: 2 },
-            { id: 'king', name: 'King', rarity: 'epic', buff: 'Increased Pickaxe damage (30 → 120).', location: 'Sprite Chests.', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], rates: { base: '9.00%', gold: '0.4%', gummy: '0.3%', galaxy: '0.16%', holofoil: '0.06%' }, bg: '#1f1b31', row: 1, col: 3 },
-            { id: 'aura', name: 'Aura', rarity: 'epic', buff: 'Gain a Shock Rock charge on damage dealt (175 → 75 Damage).', location: 'Sprite Chests.', variants: ['base', 'gold', 'gummy', 'galaxy'], rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%' }, bg: '#221931', row: 1, col: 4 },
-            { id: 'striker', name: 'Striker', rarity: 'epic', buff: 'Gain Overdrive boost (6 → 10s) when mantling or hurdling.', location: 'Sprite Chests.', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%', holofoil: '0.05%' }, bg: '#2d183d', row: 2, col: 0 },
-            { id: 'dream', name: 'Dream', rarity: 'legendary', buff: 'Grants items on level up. Explodes with Legendary loot at max level.', location: 'Storage crates.', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%', cube: '—' }, bg: '#402011', row: 2, col: 1 },
-            { id: 'punk', name: 'Punk', rarity: 'legendary', buff: 'At Level 5 grants unlimited ammo.', location: 'Sprite Chests.', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%', cube: '—' }, bg: '#45200d', row: 2, col: 2 },
-            { id: 'boss', name: 'Boss', rarity: 'legendary', buff: 'Boosts max Health (5 → 25) and Shield (5 → 25).', location: 'Sprite Chests.', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%', cube: '—' }, bg: '#412211', row: 2, col: 3 },
-            { id: 'seven', name: 'Seven', rarity: 'legendary', buff: 'Reveal enemy foot trails to nearby squadmates.', location: 'Sprite Chests.', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%', holofoil: '0.05%' }, bg: '#3b2413', row: 2, col: 4 },
-            { id: 'grim', name: 'Grim Reaper', rarity: 'mythic', buff: 'Attacking opponents get Scanned (3 → 5 seconds).', location: 'Sprite Chests.', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], rates: { base: '0.09%', gold: '—', gummy: '—', galaxy: '—', cube: '—' }, bg: '#3d3413', row: 3, col: 0 },
-            { id: 'zeropoint', name: 'Zero Point', rarity: 'mythic', buff: 'Spawns Shield Bubble Jr. (6 → 10s) when using heal items.', location: 'Sprite Chests.', variants: ['base', 'gold', 'gummy', 'galaxy'], rates: { base: '0.00093%', gold: '—', gummy: '—', galaxy: '—' }, bg: '#3a3212', row: 3, col: 1 },
-            { id: 'burntpeanut', name: 'Burnt Peanut', rarity: 'mythic', buff: 'Extra loot chance (20% → 60%) from eliminations.', location: 'Relic Chests.', variants: ['base'], rates: { base: '—' }, bg: '#432e12', row: 3, col: 2 },
-            { id: 'batman', name: 'Batman', rarity: 'mythic', buff: 'Launches user upwards and deploys Bat Cape.', location: 'Sprite Chests.', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil', 'cube'], rates: { base: '2.23%', gold: '0.1%', gummy: '0.07%', galaxy: '0.04%', holofoil: '0.01%', cube: '—' }, bg: '#3a3413', row: 3, col: 3 },
-            { id: 'pollo', name: 'Pollo', rarity: 'mythic', buff: 'Replenishes Shield after eliminating enemy players.', location: 'Sprite Chests.', variants: ['base'], rates: { base: '1.50%' }, bg: '#342211', row: 3, col: 4 },
-            { id: 'vini', name: 'Vini Jr.', rarity: 'mythic', buff: 'Increases structural damage and slide kick buffs.', location: 'Relic Chests.', variants: ['base'], rates: { base: '1.00%' }, bg: '#252233', row: 4, col: 0 }
-        ];
+    function getVariantLabel(key) { return variantMeta[key]?.label || key; }
+    function getVariantClassKey(key) { return variantMeta[key]?.className || key; }
 
-        async function loadLatestSpriteSheet() {
-            try {
-                const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-                    headers: { "X-Master-Key": API_KEY }
-                });
-                const data = await response.json();
-                if (data.record && data.record.spriteSheet) {
-                    customSheetImage = data.record.spriteSheet;
-                    localStorage.setItem("customSpriteSheet", customSheetImage);
-                } else {
-                    const cached = localStorage.getItem("customSpriteSheet");
-                    if (cached) customSheetImage = cached;
-                }
-            } catch (err) {
+    // Core 25 Sprites Total (Updated to match grid layout and names from the picture)
+    const spritesData = [
+        { id: 'water', name: 'Water', rarity: 'rare', buff: 'Replenishes Shield (2 → 6 Shield per tick) for user and squadmates in water.', location: 'Near rivers and beaches.', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil', 'quack'], rates: { base: '—', gold: '0.75%', gummy: '0.62%', galaxy: '0.5%', holofoil: '0.25%', quack: '-' }, bg: '#0d324d', row: 0, col: 0 },
+        { id: 'earth', name: 'Earth', rarity: 'rare', buff: 'Increased chance (10% → 20%) to find extra rare items in chests.', location: 'Forests and wooded regions.', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube', 'quack'], rates: { base: '—', gold: '0.75%', gummy: '0.62%', galaxy: '0.5%', cube: '—', quack: '-' }, bg: '#172e21', row: 0, col: 1 },
+        { id: 'fire', name: 'Fire', rarity: 'rare', buff: 'Creates a Fire burst upon dealing enough damage (150 → 50 Damage).', location: 'Urban areas.', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil', 'cube', 'quack'], rates: { base: '—', gold: '0.75%', gummy: '0.62%', galaxy: '0.5%', holofoil: '0.25%', cube: '—', quack: '-' }, bg: '#3a2012', row: 0, col: 2 },
+        { id: 'fishy', name: 'Fishy', rarity: 'rare', buff: 'Swim faster (25% → 200%) and gain speed boost when damaged.', location: 'Rivers and beaches.', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], rates: { base: '—', gold: '0.75%', gummy: '0.62%', galaxy: '0.5%', cube: '—' }, bg: '#0e2b40', row: 0, col: 3 },
+        { id: 'air', name: 'Air', rarity: 'rare', buff: 'Increases sprint speed (10% → 20%) and jump height (10% → 50%).', location: 'Mountainous areas.', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], rates: { base: '—', gold: '0.75%', gummy: '0.62%', galaxy: '0.5%', holofoil: '0.25%' }, bg: '#0e2b43', row: 0, col: 4 },
+        { id: 'duck', name: 'Duck', rarity: 'epic', buff: 'Emoting or Jamming replenishes Shield (2 → 8 Shield per tick).', location: 'Business mogul vault.', variants: ['base', 'gold', 'gummy', 'galaxy', 'quack'], rates: { base: '9.00%', gold: '0.4%', gummy: '0.3%', galaxy: '0.16%', quack: '0.10%' }, bg: '#33173d', row: 1, col: 0 },
+        { id: 'ghost', name: 'Ghost', rarity: 'epic', buff: 'Grants Cloak upon reloading (3 → 5 seconds).', location: 'World at nighttime.', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], rates: { base: '9.00%', gold: '0.4%', gummy: '0.3%', galaxy: '0.16%', holofoil: '0.06%' }, bg: '#35183f', row: 1, col: 1 },
+        { id: 'demon', name: 'Demon', rarity: 'epic', buff: 'Grants Siphon (10 HP → 30 HP) upon eliminations.', location: 'Sprite Chests.', variants: ['base', 'gold', 'gummy', 'galaxy'], rates: { base: '9.00%', gold: '0.4%', gummy: '0.3%', galaxy: '0.16%' }, bg: '#2b1535', row: 1, col: 2 },
+        { id: 'king', name: 'King', rarity: 'epic', buff: 'Increased Pickaxe damage (30 → 120).', location: 'Sprite Chests.', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], rates: { base: '9.00%', gold: '0.4%', gummy: '0.3%', galaxy: '0.16%', holofoil: '0.06%' }, bg: '#1f1b31', row: 1, col: 3 },
+        { id: 'aura', name: 'Aura', rarity: 'epic', buff: 'Gain a Shock Rock charge on damage dealt (175 → 75 Damage).', location: 'Sprite Chests.', variants: ['base', 'gold', 'gummy', 'galaxy'], rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%' }, bg: '#221931', row: 1, col: 4 },
+        { id: 'striker', name: 'Striker', rarity: 'epic', buff: 'Gain Overdrive boost (6 → 10s) when mantling or hurdling.', location: 'Sprite Chests.', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%', holofoil: '0.05%' }, bg: '#2d183d', row: 2, col: 0 },
+        { id: 'dream', name: 'Dream', rarity: 'legendary', buff: 'Grants items on level up. Explodes with Legendary loot at max level.', location: 'Storage crates.', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%', cube: '—' }, bg: '#402011', row: 2, col: 1 },
+        { id: 'punk', name: 'Punk', rarity: 'legendary', buff: 'At Level 5 grants unlimited ammo.', location: 'Sprite Chests.', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%', cube: '—' }, bg: '#45200d', row: 2, col: 2 },
+        { id: 'boss', name: 'Boss', rarity: 'legendary', buff: 'Boosts max Health (5 → 25) and Shield (5 → 25).', location: 'Sprite Chests.', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube'], rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%', cube: '—' }, bg: '#412211', row: 2, col: 3 },
+        { id: 'seven', name: 'Seven', rarity: 'legendary', buff: 'Reveal enemy foot trails to nearby squadmates.', location: 'Sprite Chests.', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], rates: { base: '6.98%', gold: '0.31%', gummy: '0.23%', galaxy: '0.12%', holofoil: '0.05%' }, bg: '#3b2413', row: 2, col: 4 },
+        { id: 'lootinllama', name: "Lootin' Llama", rarity: 'legendary', buff: 'Opening ammo boxes has a chance to grant a weapon upgrade', location: 'Sprite Chests', variants: ['base', 'gold', 'gummy', 'galaxy', 'gem'], rates: { base: '4.45%', gold: '0.43%', gummy: '0.26%', galaxy: '0.17%', gem: '-'}, bg: '#2a1a3a', row: 3, col: 0 },
+        { id: 'peekypeely', name: 'Peeky Peely', rarity: 'legendary', buff: 'Marks rare sprite variants nearby, including enemies with variants, but reveals your location', location: 'Sprite Chests', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil'], rates: { base: '4.62%', gold: "0.43%", gummy: '0.26%', galaxy: '0.17%', holofoil: '0.85%'}, bg: '#3a3510', row: 3, col: 1 },
+        { id: 'grim', name: 'Grim Reaper', rarity: 'mythic', buff: 'Attacking opponents get Scanned (3 → 5 seconds).', location: 'Sprite Chests.', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube', 'gem'], rates: { base: '0.09%', gold: '—', gummy: '—', galaxy: '—', cube: '—', holofoil: '-', gem: '-' }, bg: '#3d3413', row: 3, col: 2 },
+        { id: 'zeropoint', name: 'Zero Point', rarity: 'mythic', buff: 'Spawns Shield Bubble Jr. (6 → 10s) when using heal items.', location: 'Sprite Chests.', variants: ['base', 'gold', 'gummy', 'galaxy', 'cube', 'holofoil', 'quack'], rates: { base: '0.00093%', gold: '—', gummy: '—', galaxy: '-', cube: '0.0000014', holofoil: '0.00028', quack: '-' }, bg: '#3a3212', row: 3, col: 3 },
+        { id: 'burntpeanut', name: 'Burnt Peanut', rarity: 'mythic', buff: 'Extra loot chance (20% → 60%) from eliminations.', location: 'Relic Chests.', variants: ['base'], rates: { base: '—' }, bg: '#432e12', row: 3, col: 4 },
+        { id: 'batman', name: 'Batman', rarity: 'mythic', buff: 'Launches user upwards and deploys Bat Cape.', location: 'Sprite Chests.', variants: ['base', 'gold', 'gummy', 'galaxy', 'holofoil', 'cube'], rates: { base: '2.23%', gold: '0.1%', gummy: '0.07%', galaxy: '0.04%', holofoil: '0.01%', cube: '—' }, bg: '#3a3413', row: 4, col: 0 },
+        { id: 'pollo', name: 'Pollo', rarity: 'mythic', buff: 'Replenishes Shield after eliminating enemy players.', location: 'Sprite Chests.', variants: ['base'], rates: { base: '1.50%' }, bg: '#342211', row: 4, col: 1 },
+        { id: 'vini', name: 'Vini Jr.', rarity: 'mythic', buff: 'Increases structural damage and slide kick buffs.', location: 'Relic Chests.', variants: ['base'], rates: { base: '1.00%' }, bg: '#252233', row: 4, col: 2 },
+        { id: 'ironmouse', name: 'Ironmouse', rarity: 'mythic', buff: 'Regen health over time. While regening, gain cloak and low gravity', location: 'Sprite Chests', variants: ['base'], rates: { base: '2.14%' }, bg: '#102a3a', row: 4, col: 3 },
+        { id: 'johnwick', name: 'John Wick', rarity: 'mythic', buff: 'Knocking players reveals others nearby', location: 'Reload Map', variants: ['base'], rates: { base: '0%' }, bg: '#3a2010', row: 4, col: 4 }
+    ];
+
+    async function loadLatestSpriteSheet() {
+        try {
+            const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+                headers: { "X-Master-Key": API_KEY }
+            });
+            const data = await response.json();
+            if (data.record && data.record.spriteSheet) {
+                customSheetImage = data.record.spriteSheet;
+                localStorage.setItem("customSpriteSheet", customSheetImage);
+            } else {
                 const cached = localStorage.getItem("customSpriteSheet");
                 if (cached) customSheetImage = cached;
             }
+        } catch (err) {
+            const cached = localStorage.getItem("customSpriteSheet");
+            if (cached) customSheetImage = cached;
+        }
+    }
+
+    async function initApp() {
+        populateOptimizerSelects();
+        setupTimerDisplay();
+        await loadLatestSpriteSheet();
+        renderGrid();
+        updateProgress();
+        updateLoadoutOptimization();
+    }
+
+    function populateOptimizerSelects() {
+        const select1 = document.getElementById('opt-slot-1');
+        let html = '<option value="">-- Choose Sprite --</option>';
+        spritesData.forEach(s => {
+            html += `<option value="${s.id}">${s.name} (${s.rarity.toUpperCase()})</option>`;
+        });
+        select1.innerHTML = html;
+    }
+
+    function updateLoadoutOptimization() {
+        const slot1Id = document.getElementById('opt-slot-1').value;
+        const output = document.getElementById('optimizer-output');
+        
+        if (!slot1Id) {
+            output.innerHTML = 'Select your equipped sprite above to review its active gameplay buff.';
+            return;
         }
 
-        async function initApp() {
-            populateOptimizerSelects();
-            setupTimerDisplay();
-            await loadLatestSpriteSheet();
-            renderGrid();
-            updateProgress();
-            updateLoadoutOptimization();
-        }
+        const sprite = spritesData.find(s => s.id === slot1Id);
+        if (!sprite) return;
 
-        function populateOptimizerSelects() {
-            const select1 = document.getElementById('opt-slot-1');
-            let html = '<option value="">-- Choose Sprite --</option>';
-            spritesData.forEach(s => {
-                html += `<option value="${s.id}">${s.name} (${s.rarity.toUpperCase()})</option>`;
-            });
-            select1.innerHTML = html;
-        }
+        output.innerHTML = `<strong style="color: var(--rarity-${sprite.rarity}); font-size: 0.95rem;">${sprite.name} Sprite (${sprite.rarity.toUpperCase()})</strong><br><span style="color: var(--accent-teal); font-size: 0.85rem; margin-top: 4px; display: block;">Buff: ${sprite.buff}</span>`;
+    }
 
-        function updateLoadoutOptimization() {
-            const slot1Id = document.getElementById('opt-slot-1').value;
-            const output = document.getElementById('optimizer-output');
-            
-            if (!slot1Id) {
-                output.innerHTML = 'Select your equipped sprite above to review its active gameplay buff.';
+    function renderGrid() {
+        const grid = document.getElementById('sprite-grid');
+        const searchVal = document.getElementById('search').value.toLowerCase();
+        grid.innerHTML = '';
+
+        spritesData.forEach(s => {
+            if (searchVal && !s.name.toLowerCase().includes(searchVal) && !s.buff.toLowerCase().includes(searchVal)) {
                 return;
             }
 
-            const sprite = spritesData.find(s => s.id === slot1Id);
-            if (!sprite) return;
+            const variants = s.variants;
+            let collectedCount = 0;
+            let masteredCount = 0;
 
-            output.innerHTML = `<strong style="color: var(--rarity-${sprite.rarity}); font-size: 0.95rem;">${sprite.name} Sprite (${sprite.rarity.toUpperCase()})</strong><br><span style="color: var(--accent-teal); font-size: 0.85rem; margin-top: 4px; display: block;">Buff: ${sprite.buff}</span>`;
-        }
-
-        function renderGrid() {
-            const grid = document.getElementById('sprite-grid');
-            const searchVal = document.getElementById('search').value.toLowerCase();
-            grid.innerHTML = '';
-
-            spritesData.forEach(s => {
-                if (searchVal && !s.name.toLowerCase().includes(searchVal) && !s.buff.toLowerCase().includes(searchVal)) {
-                    return;
-                }
-
-                const variants = s.variants;
-                let collectedCount = 0;
-                let masteredCount = 0;
-
-                variants.forEach(v => {
-                    if (collectedData[s.id]?.[v]) collectedCount++;
-                    if (masteryData[s.id]?.[v]) masteredCount++;
-                });
-
-                const isCompleted = collectedCount === variants.length;
-                const isMastered = masteredCount === variants.length;
-
-                const card = document.createElement('div');
-                card.className = `card ${isMastered ? 'mastered' : (isCompleted ? 'completed' : '')}`;
-                card.onclick = () => openModal(s.id);
-
-                let dotsHtml = '';
-                variants.forEach(v => {
-                    const isActive = collectedData[s.id]?.[v];
-                    const classKey = getVariantClassKey(v);
-                    dotsHtml += `<div class="v-dot ${isActive ? 'active-' + classKey : ''}"></div>`;
-                });
-
-                card.innerHTML = `
-                    <div class="badge" style="color: var(--rarity-${s.rarity});">${s.rarity.toUpperCase()}</div>
-                    <div class="card-preview">
-                        <div class="sprite-img" style="background: ${s.bg}; background-image: url('${customSheetImage}'); background-size: 500% 500%; background-position: -${s.col * 100}% -${s.row * 100}%;"></div>
-                        ${isMastered ? '<div class="stamp-badge mastered-stamp">MASTERED</div>' : (isCompleted ? '<div class="stamp-badge owned-stamp">OWNED</div>' : '')}
-                    </div>
-                    <div class="card-title" style="color: var(--rarity-${s.rarity});">
-                        ${s.name}
-                    </div>
-                    <div class="card-variants-bar">
-                        ${dotsHtml}
-                    </div>
-                `;
-                grid.appendChild(card);
-            });
-        }
-
-        function openModal(id) {
-            activeModalSpriteId = id;
-            const s = spritesData.find(item => item.id === id);
-            if (!s) return;
-
-            document.getElementById('modal-title').innerText = `${s.name} Sprite`;
-            document.getElementById('modal-obtain-text').innerText = s.location;
-
-            const chancesGrid = document.getElementById('modal-chances-grid');
-            chancesGrid.innerHTML = '';
-            s.variants.forEach(v => {
-                const rate = s.rates[v] || '—';
-                chancesGrid.innerHTML += `
-                    <div class="chance-item">
-                        <span class="chance-label">${getVariantLabel(v)}</span>
-                        <span class="chance-val">${rate}</span>
-                    </div>
-                `;
+            variants.forEach(v => {
+                if (collectedData[s.id]?.[v]) collectedCount++;
+                if (masteryData[s.id]?.[v]) masteredCount++;
             });
 
-            renderVariantList(s);
-            document.getElementById('modal-overlay').classList.add('active');
-        }
+            const isCompleted = collectedCount === variants.length;
+            const isMastered = masteredCount === variants.length;
 
-        function closeModal(e) {
-            if (e.target.id === 'modal-overlay') {
-                document.getElementById('modal-overlay').classList.remove('active');
-                activeModalSpriteId = null;
-                renderGrid();
-                updateProgress();
-            }
-        }
+            const card = document.createElement('div');
+            card.className = `card ${isMastered ? 'mastered' : (isCompleted ? 'completed' : '')}`;
+            card.onclick = () => openModal(s.id);
 
-        function renderVariantList(s) {
-            const list = document.getElementById('variant-list');
-            list.innerHTML = '';
-
-            if (!collectedData[s.id]) collectedData[s.id] = {};
-            if (!masteryData[s.id]) masteryData[s.id] = {};
-
-            let spriteMasteredCount = 0;
-            s.variants.forEach(v => {
-                if (masteryData[s.id][v]) spriteMasteredCount++;
+            let dotsHtml = '';
+            variants.forEach(v => {
+                const isActive = collectedData[s.id]?.[v];
+                const classKey = getVariantClassKey(v);
+                dotsHtml += `<div class="v-dot ${isActive ? 'active-' + classKey : ''}"></div>`;
             });
 
-            const masteryPercent = Math.round((spriteMasteredCount / s.variants.length) * 100);
-            document.getElementById('modal-mastery-progress-text').innerText = `${spriteMasteredCount} / ${s.variants.length} (${masteryPercent}%)`;
-            document.getElementById('modal-mastery-progress-bar').style.width = `${masteryPercent}%`;
+            card.innerHTML = `
+                <div class="badge" style="color: var(--rarity-${s.rarity});">${s.rarity.toUpperCase()}</div>
+                <div class="card-preview">
+                    <div class="sprite-img" style="background: ${s.bg}; background-image: url('${customSheetImage}'); background-size: 500% 500%; background-position: -${s.col * 100}% -${s.row * 100}%;"></div>
+                    ${isMastered ? '<div class="stamp-badge mastered-stamp">MASTERED</div>' : (isCompleted ? '<div class="stamp-badge owned-stamp">OWNED</div>' : '')}
+                </div>
+                <div class="card-title" style="color: var(--rarity-${s.rarity});">
+                    ${s.name}
+                </div>
+                <div class="card-variants-bar">
+                    ${dotsHtml}
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
 
-            s.variants.forEach(v => {
-                const isCollected = !!collectedData[s.id][v];
-                const isMastered = !!masteryData[s.id][v];
-                
-                const item = document.createElement('div');
-                item.className = `variant-item`;
+    function openModal(id) {
+        activeModalSpriteId = id;
+        const s = spritesData.find(item => item.id === id);
+        if (!s) return;
 
-                item.innerHTML = `
-                    <div class="variant-item-top v-color-${getVariantClassKey(v)}">
-                        ${getVariantLabel(v)} Variant
-                    </div>
-                    <div class="variant-controls-group">
-                        <div class="control-pill collected ${isCollected ? 'active' : ''}" onclick="toggleVariant('${s.id}', '${v}')">
-                            <span>Collected</span>
-                            <div class="checkbox"></div>
-                        </div>
-                        <div class="control-pill mastered ${isMastered ? 'active' : ''}" onclick="toggleVariantMastery('${s.id}', '${v}')">
-                            <span>Mastered</span>
-                            <div class="checkbox"></div>
-                        </div>
-                    </div>
-                `;
-                list.appendChild(item);
-            });
-        }
+        document.getElementById('modal-title').innerText = `${s.name} Sprite`;
+        document.getElementById('modal-obtain-text').innerText = s.location;
 
-        function toggleVariant(spriteId, variantKey) {
-            if (!collectedData[spriteId]) collectedData[spriteId] = {};
-            collectedData[spriteId][variantKey] = !collectedData[spriteId][variantKey];
-            localStorage.setItem('spriteData', JSON.stringify(collectedData));
+        const chancesGrid = document.getElementById('modal-chances-grid');
+        chancesGrid.innerHTML = '';
+        s.variants.forEach(v => {
+            const rate = s.rates[v] || '—';
+            chancesGrid.innerHTML += `
+                <div class="chance-item">
+                    <span class="chance-label">${getVariantLabel(v)}</span>
+                    <span class="chance-val">${rate}</span>
+                </div>
+            `;
+        });
 
-            const s = spritesData.find(item => item.id === spriteId);
-            renderVariantList(s);
-            checkCompletionCelebration();
-        }
+        renderVariantList(s);
+        document.getElementById('modal-overlay').classList.add('active');
+    }
 
-        function toggleVariantMastery(spriteId, variantKey) {
-            if (!masteryData[spriteId]) masteryData[spriteId] = {};
-            masteryData[spriteId][variantKey] = !masteryData[spriteId][variantKey];
-            localStorage.setItem('spriteVariantMastery', JSON.stringify(masteryData));
-
-            const s = spritesData.find(item => item.id === spriteId);
-            renderVariantList(s);
+    function closeModal(e) {
+        if (e.target.id === 'modal-overlay') {
+            document.getElementById('modal-overlay').classList.remove('active');
+            activeModalSpriteId = null;
+            renderGrid();
             updateProgress();
         }
+    }
 
-        function toggleAllVariantsForCurrentSprite() {
-            if (!activeModalSpriteId) return;
-            const s = spritesData.find(item => item.id === activeModalSpriteId);
-            if (!s) return;
+    function renderVariantList(s) {
+        const list = document.getElementById('variant-list');
+        list.innerHTML = '';
 
-            if (!collectedData[s.id]) collectedData[s.id] = {};
-            if (!masteryData[s.id]) masteryData[s.id] = {};
+        if (!collectedData[s.id]) collectedData[s.id] = {};
+        if (!masteryData[s.id]) masteryData[s.id] = {};
+
+        let spriteMasteredCount = 0;
+        s.variants.forEach(v => {
+            if (masteryData[s.id][v]) spriteMasteredCount++;
+        });
+
+        const masteryPercent = Math.round((spriteMasteredCount / s.variants.length) * 100);
+        document.getElementById('modal-mastery-progress-text').innerText = `${spriteMasteredCount} / ${s.variants.length} (${masteryPercent}%)`;
+        document.getElementById('modal-mastery-progress-bar').style.width = `${masteryPercent}%`;
+
+        s.variants.forEach(v => {
+            const isCollected = !!collectedData[s.id][v];
+            const isMastered = !!masteryData[s.id][v];
             
-            const allCollected = s.variants.every(v => collectedData[s.id][v]);
+            const item = document.createElement('div');
+            item.className = `variant-item`;
+
+            item.innerHTML = `
+                <div class="variant-item-top v-color-${getVariantClassKey(v)}">
+                    ${getVariantLabel(v)} Variant
+                </div>
+                <div class="variant-controls-group">
+                    <div class="control-pill collected ${isCollected ? 'active' : ''}" onclick="toggleVariant('${s.id}', '${v}')">
+                        <span>Collected</span>
+                        <div class="checkbox"></div>
+                    </div>
+                    <div class="control-pill mastered ${isMastered ? 'active' : ''}" onclick="toggleVariantMastery('${s.id}', '${v}')">
+                        <span>Mastered</span>
+                        <div class="checkbox"></div>
+                    </div>
+                </div>
+            `;
+            list.appendChild(item);
+        });
+    }
+
+    function toggleVariant(spriteId, variantKey) {
+        if (!collectedData[spriteId]) collectedData[spriteId] = {};
+        collectedData[spriteId][variantKey] = !collectedData[spriteId][variantKey];
+        localStorage.setItem('spriteData', JSON.stringify(collectedData));
+
+        const s = spritesData.find(item => item.id === spriteId);
+        renderVariantList(s);
+        checkCompletionCelebration();
+    }
+
+    function toggleVariantMastery(spriteId, variantKey) {
+        if (!masteryData[spriteId]) masteryData[spriteId] = {};
+        masteryData[spriteId][variantKey] = !masteryData[spriteId][variantKey];
+        localStorage.setItem('spriteVariantMastery', JSON.stringify(masteryData));
+
+        const s = spritesData.find(item => item.id === spriteId);
+        renderVariantList(s);
+        updateProgress();
+    }
+
+    function toggleAllVariantsForCurrentSprite() {
+        if (!activeModalSpriteId) return;
+        const s = spritesData.find(item => item.id === activeModalSpriteId);
+        if (!s) return;
+
+        if (!collectedData[s.id]) collectedData[s.id] = {};
+        if (!masteryData[s.id]) masteryData[s.id] = {};
+        
+        const allCollected = s.variants.every(v => collectedData[s.id][v]);
+        s.variants.forEach(v => {
+            collectedData[s.id][v] = !allCollected;
+            masteryData[s.id][v] = !allCollected;
+        });
+
+        localStorage.setItem('spriteData', JSON.stringify(collectedData));
+        localStorage.setItem('spriteVariantMastery', JSON.stringify(masteryData));
+        renderVariantList(s);
+        checkCompletionCelebration();
+    }
+
+    function updateProgress() {
+        let totalVariants = 0, collectedCount = 0, masteredCount = 0;
+
+        spritesData.forEach(s => {
             s.variants.forEach(v => {
-                collectedData[s.id][v] = !allCollected;
-                masteryData[s.id][v] = !allCollected;
+                totalVariants++;
+                if (collectedData[s.id]?.[v]) collectedCount++;
+                if (masteryData[s.id]?.[v]) masteredCount++;
             });
+        });
 
-            localStorage.setItem('spriteData', JSON.stringify(collectedData));
-            localStorage.setItem('spriteVariantMastery', JSON.stringify(masteryData));
-            renderVariantList(s);
-            checkCompletionCelebration();
-        }
+        const collectedPercent = totalVariants > 0 ? Math.round((collectedCount / totalVariants) * 100) : 0;
+        document.getElementById('progress-text').innerText = `${collectedCount} / ${totalVariants} (${collectedPercent}%)`;
+        document.getElementById('progress-bar').style.width = `${collectedPercent}%`;
 
-        function updateProgress() {
-            let totalVariants = 0, collectedCount = 0, masteredCount = 0;
+        const masteryPercent = totalVariants > 0 ? Math.round((masteredCount / totalVariants) * 100) : 0;
+        document.getElementById('mastery-overall-text').innerText = `${masteredCount} / ${totalVariants} (${masteryPercent}%)`;
+        document.getElementById('mastery-overall-bar').style.width = `${masteryPercent}%`;
+    }
 
-            spritesData.forEach(s => {
-                s.variants.forEach(v => {
-                    totalVariants++;
-                    if (collectedData[s.id]?.[v]) collectedCount++;
-                    if (masteryData[s.id]?.[v]) masteredCount++;
-                });
+    function checkCompletionCelebration() {
+        let totalVariants = 0, collectedCount = 0;
+        spritesData.forEach(s => {
+            s.variants.forEach(v => {
+                totalVariants++;
+                if (collectedData[s.id]?.[v]) collectedCount++;
             });
+        });
 
-            const collectedPercent = totalVariants > 0 ? Math.round((collectedCount / totalVariants) * 100) : 0;
-            document.getElementById('progress-text').innerText = `${collectedCount} / ${totalVariants} (${collectedPercent}%)`;
-            document.getElementById('progress-bar').style.width = `${collectedPercent}%`;
-
-            const masteryPercent = totalVariants > 0 ? Math.round((masteredCount / totalVariants) * 100) : 0;
-            document.getElementById('mastery-overall-text').innerText = `${masteredCount} / ${totalVariants} (${masteryPercent}%)`;
-            document.getElementById('mastery-overall-bar').style.width = `${masteryPercent}%`;
-        }
-
-        function checkCompletionCelebration() {
-            let totalVariants = 0, collectedCount = 0;
-            spritesData.forEach(s => {
-                s.variants.forEach(v => {
-                    totalVariants++;
-                    if (collectedData[s.id]?.[v]) collectedCount++;
-                });
-            });
 
             if (collectedCount === totalVariants && !hasFiredConfettiThisSession) {
                 hasFiredConfettiThisSession = true;
@@ -992,6 +999,17 @@
 
         function dismissTimerAlarm() {
             document.getElementById('timer-alarm-overlay').classList.remove('active');
+        }
+
+        // Owned & Mastered Full-Image Overlay Feature
+        function openFullImageOverlay() {
+            const overlay = document.getElementById('full-image-overlay');
+            if (overlay) overlay.classList.add('active');
+        }
+
+        function closeFullImageOverlay() {
+            const overlay = document.getElementById('full-image-overlay');
+            if (overlay) overlay.classList.remove('active');
         }
 
         function fireConfetti() {
